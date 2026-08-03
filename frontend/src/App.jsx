@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import TrajectoryViewer from './TrajectoryViewer';
 
 function App() {
+    const [activeTab, setActiveTab] = useState('trajectory');
     const [uniprotId, setUniprotId] = useState('P00918');
     const [smiles, setSmiles] = useState('CC(=O)NC1=NN=C(S1)S(=O)(=O)N');
     const [targetResidue, setTargetResidue] = useState("");
@@ -53,6 +55,24 @@ function App() {
                 </p>
             </div>
 
+            <div className="flex rounded-md border border-gray-300 overflow-hidden text-sm mb-8">
+                {[
+                    { id: 'trajectory', label: 'Trajectory Viewer' },
+                    { id: 'docking', label: 'Docking' },
+                ].map((tab) => (
+                    <button
+                        key={tab.id}
+                        onClick={() => setActiveTab(tab.id)}
+                        className={`px-4 py-2 ${activeTab === tab.id ? 'bg-gray-900 text-white' : 'bg-white text-gray-700'}`}
+                    >
+                        {tab.label}
+                    </button>
+                ))}
+            </div>
+
+            {activeTab === 'trajectory' && <TrajectoryViewer />}
+
+            {activeTab === 'docking' && (
             <div className="max-w-md w-full bg-white p-8 border border-gray-200 shadow-sm rounded-lg">
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div>
@@ -131,8 +151,9 @@ function App() {
                     </div>
                 )}
             </div>
+            )}
 
-            {result && (
+            {activeTab === 'docking' && result && (
                 <div className="max-w-3xl w-full mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2">
                     <div className="bg-white p-6 border border-gray-200 shadow-sm rounded-lg">
                         <h3 className="text-lg font-medium text-gray-900 border-b border-gray-100 pb-2 mb-4">Docking Affinity</h3>
