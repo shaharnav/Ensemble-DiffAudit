@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import TrajectoryViewer from './TrajectoryViewer';
 
+const DOCKING_ENABLED = import.meta.env.VITE_ENABLE_DOCKING === 'true';
+
 function App() {
     const [activeTab, setActiveTab] = useState('trajectory');
     const [uniprotId, setUniprotId] = useState('P00918');
@@ -58,7 +60,7 @@ function App() {
             <div className="flex rounded-md border border-gray-300 overflow-hidden text-sm mb-8">
                 {[
                     { id: 'trajectory', label: 'Trajectory Viewer' },
-                    { id: 'docking', label: 'Docking' },
+                    ...(DOCKING_ENABLED ? [{ id: 'docking', label: 'Docking' }] : []),
                 ].map((tab) => (
                     <button
                         key={tab.id}

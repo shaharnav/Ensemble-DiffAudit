@@ -12,6 +12,9 @@ ENV/
 *.pdbqt
 *.sdf
 
+# Static demo data bundled into the Vercel-deployed frontend
+!frontend/public/results/payload_unpacked/*.pdb
+
 # Python artifacts
 __pycache__/
 *.py[cod]
@@ -25,6 +28,8 @@ __pycache__/
 
 frontend/node_modules/
 frontend/dist/
+frontend/.env.local
+.vercel
 
 # Directories
 bin/

@@ -2,6 +2,8 @@
 
 Ensemble-DiffSplat is a high-throughput computational biology pipeline integrating Generative Structure-Based Drug Design (DiffSBDD) with dynamic protein conformational breathing (ConforMix & Boltz). It systematically generates *de novo* ligands and evaluates them against an induced-fit structural ensemble via AutoDock Vina—saving robust cross-docking matrices for dynamic 4D rendering via Gaussian Splatting interfaces.
 
+**[Live demo](https://your-vercel-project.vercel.app)** — trypsin (PDB 3PTB), 3 DiffSBDD-generated candidates docked against a 6-conformer breathing receptor ensemble. Static build, no backend required (see [`frontend/README` setup below](#frontend--live-demo)).
+
 ## Local Environment Setup
 Before executing the auditor locally, you must hydrate the Python environment and download the AutoDock Vina binary solver.
 
@@ -57,7 +59,32 @@ When computation halts, the original payload safely relocates into the timestamp
   - **Baseline**: What that identical drug scored against the rigid immobile crystal default. Use the differential here to prove binding plasticity!
   - **ID**: Look up `Cmpd-0083` strictly within your `results/payload_unpacked/valid_trajectories/` directory. Fetching `mol_0083.xyz` lets you pipe the perfect generated coordinates into your downstream visual render engines linearly with no ambiguity.
 
-### 4. Work in progress features
-Currently working on:
-- 4D Gaussian Splatting Visualization: Using the generated trajectories to create a 4D Gaussian Splatting visualization of the protein-ligand complex, using smooth electron cloud visualizations instead of ball and stick.
-- App visualization: 1 PDB : 1 SMILES, includes more complex active site analysis, including metal bonds, pi-pi stacking, halogen bonding, and other non-covalent interactions on top of h-bonding.
+## Frontend & Live Demo
+
+`frontend/` is a Vite + React app with two views:
+
+- **Trajectory Viewer** — replays the DiffSBDD denoising trajectory for each candidate against the 3Dmol-rendered breathing receptor ensemble. Reads a static `viz_bundle.json` (built by `build_viz_bundle.py`), so it needs no backend. This is the view deployed to Vercel.
+- **Docking** — live 1 PDB : 1 SMILES docking (H-bonds, metal coordination, salt bridges, halogen bonds) against `app.py`'s Flask/Vina backend. Requires a local backend and AutoDock Vina, so it's disabled in the static deploy.
+
+### Run locally
+```bash
+cd frontend
+npm install
+npm run dev       # trajectory viewer only
+```
+To also use the Docking tab locally, run `python app.py` (with the venv + Vina binary from setup above) and set `VITE_ENABLE_DOCKING=true` in `frontend/.env.local` — Vite proxies `/api`, `/results`, and `/pdbs` to the Flask server per `frontend/vite.config.js`.
+
+### Deploy the static demo to Vercel
+The trypsin trajectory data is committed under `frontend/public/results/payload_unpacked/` so the build is fully static.
+
+1. In the Vercel dashboard, import this GitHub repo.
+2. Set **Root Directory** to `frontend`.
+3. Framework preset: Vite (build command `npm run build`, output `dist` — already set in `frontend/vercel.json`).
+4. Leave `VITE_ENABLE_DOCKING` unset so the Docking tab stays hidden (no backend on Vercel).
+5. Deploy, then swap the live demo link at the top of this README for your `*.vercel.app` URL.
+
+To refresh the demo data after regenerating a new ensemble, copy the new `viz_bundle.json` and `receptor_breathing.pdb` from `results/payload_unpacked/` into `frontend/public/results/payload_unpacked/` and redeploy.
+
+## Work in progress features
+- 4D Gaussian Splatting Visualization: the current Trajectory Viewer uses 3Dmol ball-and-stick/cartoon rendering; a true Gaussian Splatting (smooth electron-cloud) renderer is still planned.
+- Extending the Docking tab's active-site analysis to cover pi-pi stacking on top of the existing H-bond, metal coordination, salt bridge, and halogen bond detection.
