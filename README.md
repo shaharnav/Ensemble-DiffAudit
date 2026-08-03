@@ -2,7 +2,7 @@
 
 Ensemble-DiffSplat is a high-throughput computational biology pipeline integrating Generative Structure-Based Drug Design (DiffSBDD) with dynamic protein conformational breathing (ConforMix & Boltz). It systematically generates *de novo* ligands and evaluates them against an induced-fit structural ensemble via AutoDock Vina—saving robust cross-docking matrices for dynamic 4D rendering via Gaussian Splatting interfaces.
 
-**[Live demo](https://your-vercel-project.vercel.app)** — trypsin (PDB 3PTB), 3 DiffSBDD-generated candidates docked against a 6-conformer breathing receptor ensemble. Static build, no backend required (see [`frontend/README` setup below](#frontend--live-demo)).
+**[Live demo](https://ensemble-diff-splat.vercel.app/)** — trypsin (PDB 3PTB), 3 DiffSBDD-generated candidates docked against a 6-conformer breathing receptor ensemble. Static build, no backend required (see [`frontend/README` setup below](#frontend--live-demo)).
 
 ## Local Environment Setup
 Before executing the auditor locally, you must hydrate the Python environment and download the AutoDock Vina binary solver.
