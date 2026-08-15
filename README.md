@@ -2,7 +2,7 @@
 
 Ensemble-DiffAudit is a high-throughput computational biology pipeline integrating Generative Structure-Based Drug Design (DiffSBDD) with dynamic protein conformational breathing (ConforMix & Boltz). It systematically generates *de novo* ligands and cross-docks every candidate against every conformer of an induced-fit structural ensemble via AutoDock Vina, auditing binding affinity across the full M×N matrix rather than a single rigid structure.
 
-**[Live demo](https://ensemble-diff-splat.vercel.app/)** — trypsin (PDB 3PTB), 3 DiffSBDD-generated candidates docked against a 6-conformer breathing receptor ensemble, rendered as an interactive 4D denoising-trajectory viewer. Static build, no backend required (see [`frontend/README` setup below](#frontend--live-demo)).
+**[Live demo](https://ensemble-diff-audit.vercel.app/)** — trypsin (PDB 3PTB), 3 DiffSBDD-generated candidates docked against a 6-conformer breathing receptor ensemble, rendered as an interactive 4D denoising-trajectory viewer. Static build, no backend required (see [`frontend/README` setup below](#frontend--live-demo)).
 
 ## Local Environment Setup
 Before executing the auditor locally, you must hydrate the Python environment and download the AutoDock Vina binary solver.
