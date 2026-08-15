@@ -1,8 +1,8 @@
-# Ensemble-DiffSplat
+# Ensemble-DiffAudit
 
-Ensemble-DiffSplat is a high-throughput computational biology pipeline integrating Generative Structure-Based Drug Design (DiffSBDD) with dynamic protein conformational breathing (ConforMix & Boltz). It systematically generates *de novo* ligands and evaluates them against an induced-fit structural ensemble via AutoDock Vina—saving robust cross-docking matrices for dynamic 4D rendering via Gaussian Splatting interfaces.
+Ensemble-DiffAudit is a high-throughput computational biology pipeline integrating Generative Structure-Based Drug Design (DiffSBDD) with dynamic protein conformational breathing (ConforMix & Boltz). It systematically generates *de novo* ligands and cross-docks every candidate against every conformer of an induced-fit structural ensemble via AutoDock Vina, auditing binding affinity across the full M×N matrix rather than a single rigid structure.
 
-**[Live demo](https://ensemble-diff-splat.vercel.app/)** — trypsin (PDB 3PTB), 3 DiffSBDD-generated candidates docked against a 6-conformer breathing receptor ensemble. Static build, no backend required (see [`frontend/README` setup below](#frontend--live-demo)).
+**[Live demo](https://ensemble-diff-splat.vercel.app/)** — trypsin (PDB 3PTB), 3 DiffSBDD-generated candidates docked against a 6-conformer breathing receptor ensemble, rendered as an interactive 4D denoising-trajectory viewer. Static build, no backend required (see [`frontend/README` setup below](#frontend--live-demo)).
 
 ## Local Environment Setup
 Before executing the auditor locally, you must hydrate the Python environment and download the AutoDock Vina binary solver.
@@ -53,10 +53,10 @@ When computation halts, the original payload safely relocates into the timestamp
   --- Top candidates by True Affinity ---
   Rank   ID              Affinity   Baseline   H-Bonds    Winning Conformation     
   ---------------------------------------------------------------------------------
-  1      Cmpd-0083       -4.94      -2.85      4          conformix_var_0.pdb     
+  1      Cmpd-0001       -4.67      -3.80      1          conformix_var_2.pdb     
   ```
-  - **Affinity**: The "induced-fit" energy peak achieved against the flexible states.
-  - **Baseline**: What that identical drug scored against the rigid immobile crystal default. Use the differential here to prove binding plasticity!
+  - **Affinity**: The best ("induced-fit") energy achieved across the ConforMix conformational ensemble.
+  - **Baseline**: What that identical drug scored against the full, rigid crystal structure (waters and the native co-crystallized ligand stripped). The differential between Affinity and Baseline is real *only* if the ensemble's conformers actually differ from the crystal at the binding site — check the per-conformer CA RMSD before reading a small differential as "no induced fit." With the current 3PTB ensemble (`--subset-residues "40-60"`, `--twist-target-stop 2.0`), pocket-lining CA displacement is ~0.2-0.4 Å, so most of the differential you'll see is Vina sampling noise, not plasticity.
   - **ID**: Look up `Cmpd-0083` strictly within your `results/payload_unpacked/valid_trajectories/` directory. Fetching `mol_0083.xyz` lets you pipe the perfect generated coordinates into your downstream visual render engines linearly with no ambiguity.
 
 ## Frontend & Live Demo
