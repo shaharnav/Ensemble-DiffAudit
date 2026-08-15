@@ -3,6 +3,13 @@ import glob
 import os
 from collections import Counter
 
+from rdkit import Chem
+
+
+def heavy_atom_count(smiles):
+    mol = Chem.MolFromSmiles(smiles) if smiles else None
+    return mol.GetNumHeavyAtoms() if mol else None
+
 def summarize_all_results():
     # Gather all results JSONs (handles generic results.json or specific ones like results/payload_results.json)
     json_files = glob.glob("**/*results.json", recursive=True)
@@ -110,7 +117,31 @@ def summarize_all_results():
                 out.write("No elite candidates found matching the affinity/QED/SA_Score filters.\n")
                 if lowest_affinity is not None:
                     out.write(f"\n[Info] Lowest observed affinity in dataset was {lowest_affinity:.2f} kcal/mol\n")
-                    
+
+            out.write("\n\n")
+
+            # 4. Ligand efficiency ranking — raw affinity alone hides good binders that are
+            # small (e.g. fragment-sized DiffSBDD output capped near -5 to -6 kcal/mol despite
+            # a strong per-atom contribution). LE = |affinity| / heavy_atom_count.
+            le_rows = []
+            for row in data:
+                aff = row.get('true_affinity')
+                ha = heavy_atom_count(row.get('smiles'))
+                if aff is not None and ha:
+                    le_rows.append((row, ha, abs(aff) / ha))
+
+            out.write("--- Full Ranking by Ligand Efficiency (|Affinity| / Heavy Atoms) ---\n")
+            if le_rows:
+                le_rows.sort(key=lambda t: -t[2])
+                header = f"{'ID':<12}{'Affinity':>10}{'HeavyAtoms':>12}{'LE':>8}"
+                out.write(header + "\n")
+                out.write("-" * len(header) + "\n")
+                for row, ha, le in le_rows:
+                    ident = row.get('id', row.get('original_index', 'N/A'))
+                    out.write(f"{str(ident):<12}{row.get('true_affinity'):>10.2f}{ha:>12d}{le:>8.2f}\n")
+            else:
+                out.write("No candidates with both an affinity and a valid SMILES.\n")
+
             out.write("\n")
             print(f"Saved ranking to {out_path}")
 

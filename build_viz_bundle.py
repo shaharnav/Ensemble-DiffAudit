@@ -25,7 +25,17 @@ UNPACKED = "results/payload_unpacked"
 TRAJ_DIR = os.path.join(UNPACKED, "valid_trajectories")
 SDF_PATH = os.path.join(UNPACKED, "valid_candidates.sdf")
 POCKET_PATH = os.path.join(UNPACKED, "pocket.pdb")
-RECEPTOR_DIR = os.path.join(UNPACKED, "ensemble_receptors")
+# Prefer the ConforMix variants that ensemble_auditor.py has sequence-aligned to the
+# reference crystal frame (see its "Align ConforMix variants" step) over the raw,
+# unaligned ensemble_receptors/ copies -- pocket-lining and spatial calculations here
+# are only meaningful in the aligned frame. Falls back to the raw copies if the
+# auditor hasn't been run yet.
+_ALIGNED_RECEPTOR_DIR = os.path.join(UNPACKED, "aligned_receptors")
+RECEPTOR_DIR = (
+    _ALIGNED_RECEPTOR_DIR
+    if glob.glob(os.path.join(_ALIGNED_RECEPTOR_DIR, "conformix_var_*.pdb"))
+    else os.path.join(UNPACKED, "ensemble_receptors")
+)
 METADATA_PATH = os.path.join(UNPACKED, "metadata.json")
 OUT_PATH = os.path.join(UNPACKED, "viz_bundle.json")
 RECEPTOR_PDB_OUT = os.path.join(UNPACKED, "receptor_breathing.pdb")
@@ -33,14 +43,15 @@ DOCK_OUTPUT_DIR = os.path.join(UNPACKED, "traj_docking")
 POCKET_LINING_RADIUS = 8.0  # Angstrom, for highlighting pocket-lining residues in the viewer
 
 # Geometry-verified mapping: SDF <OriginalIndex> -> trajectory filename.
-# Verified via element-multiset + sorted-pairwise-distance fingerprint match
-# (score ~0.003-0.004 A) against all 86 files in valid_trajectories/. The other
-# 5 SDF candidates have no matching trajectory (likely dropped during the
-# notebook's RDKit sanitize/fragment-pick step) and are excluded here.
+# Verified via ICP correspondence + Kabsch RMSD (see icp_correspondence below)
+# against every file in valid_trajectories/; true matches score ~0.0005 A, all
+# others fail on atom-count alone. The other 4 SDF candidates (of 7 valid) have
+# no matching trajectory (likely dropped during the notebook's RDKit
+# sanitize/fragment-pick step) and are excluded here.
 ORIGIDX_TO_TRAJ = {
-    1: "mol_0001.xyz",
     3: "mol_0003.xyz",
-    8: "mol_0008.xyz",
+    4: "mol_0004.xyz",
+    6: "mol_0006.xyz",
 }
 
 
@@ -179,11 +190,37 @@ def write_multimodel_pdb(variant_files, out_path):
         out.write("END\n")
 
 
+def _build_baseline_receptor(pdb_id):
+    """Strip waters + native ligand from the full reference crystal structure
+    (pdbs/<pdb_id>.pdb) to use as the demo-candidate docking target, instead of the
+    ~8-residue pocket.pdb crop (too few atoms for a meaningful docking score)."""
+    from Bio.PDB import PDBParser, PDBIO, Select
+
+    reference_pdb = os.path.join("pdbs", f"{pdb_id}.pdb")
+    if not os.path.exists(reference_pdb):
+        print(f"[warn] {reference_pdb} not found; falling back to {POCKET_PATH}")
+        return POCKET_PATH
+
+    class _StripHetero(Select):
+        def accept_residue(self, residue):
+            resname = residue.get_resname().strip().upper()
+            return resname not in ("HOH", "WAT", "BEN")
+
+    baseline_path = os.path.join(UNPACKED, f"{pdb_id}_baseline_crystal.pdb")
+    parser = PDBParser(QUIET=True)
+    structure = parser.get_structure("ref_baseline", reference_pdb)
+    io = PDBIO()
+    io.set_structure(structure)
+    io.save(baseline_path, _StripHetero())
+    return baseline_path
+
+
 def main():
     metadata = json.load(open(METADATA_PATH))
     pocket_center = metadata["pocket_center"]
     pocket_radius = metadata["pocket_radius"]
     box_size = [2 * pocket_radius] * 3
+    baseline_receptor = _build_baseline_receptor(metadata["pdb_id"])
 
     sdf_mols = {m["original_index"]: m for m in parse_sdf(SDF_PATH)}
 
@@ -208,7 +245,7 @@ def main():
         print(f"[origidx {origidx}] SMILES: {smiles}")
 
         dock = run_docking(
-            POCKET_PATH,
+            baseline_receptor,
             smiles,
             output_dir=DOCK_OUTPUT_DIR,
             job_name=f"trypsin_traj_{origidx}",

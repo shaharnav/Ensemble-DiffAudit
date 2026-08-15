@@ -378,7 +378,7 @@ def run_ensemble(
             if affinity is not None:
                 all_affinities[pdb_basename] = affinity
                 
-                if 'pocket.pdb' in pdb_basename:
+                if 'baseline_crystal.pdb' in pdb_basename:
                     baseline_affinity = affinity
                     
                 if best_affinity is None or affinity < best_affinity:
@@ -467,44 +467,136 @@ def run_payload_mode(
     receptor_paths = load_receptors(receptors_dir)
     logger.info(f"Loaded {len(receptor_paths)} receptor conformations for ensemble docking.")
 
-    # ── 4.5. Align ConforMix variants to Pocket ──────────────────────────────────────────
+    # ── 4.5. Align ConforMix variants to the full reference structure ────────────────────
+    # Alignment is done against the FULL crystal structure (pdbs/<pdb_id>.pdb), not the
+    # cropped pocket.pdb: the crop only has ~8 residues, too few to disambiguate an
+    # alignment, and residue *numbering* differs between ConforMix output (renumbered
+    # 1..N) and the source PDB. Since both structures cover the same chain with no gaps,
+    # residues are paired by SEQUENCE INDEX instead of by residue number.
     from Bio.PDB import PDBParser, PDBIO, Superimposer
-    pocket_path = os.path.join(receptors_dir, f"{metadata.get('pdb_id')}_pocket.pdb")
-    if not os.path.exists(pocket_path):
-        pocket_path = os.path.join(receptors_dir, "pocket.pdb")
-        
-    if os.path.exists(pocket_path):
+
+    reference_pdb = os.path.join("pdbs", f"{metadata.get('pdb_id')}.pdb")
+    aligned_dir = os.path.join(unpack_dir, "aligned_receptors")
+    os.makedirs(aligned_dir, exist_ok=True)
+    RMSD_FAIL_THRESHOLD = 2.0  # Å — anything above this means the pairing is wrong
+
+    def _standard_ca_residues(structure):
+        """Ordered list of standard (non-HETATM) residues with a CA atom."""
+        return [
+            res
+            for model in structure
+            for chain in model
+            for res in chain
+            if res.id[0] == " " and res.has_id("CA")
+        ]
+
+    if os.path.exists(reference_pdb):
         parser = PDBParser(QUIET=True)
         try:
-            target_struct = parser.get_structure('t', pocket_path)
+            ref_struct = parser.get_structure("ref", reference_pdb)
+            ref_residues = _standard_ca_residues(ref_struct)
+
+            new_receptor_paths = []
             for rpath in receptor_paths:
-                if 'conformix_var_' in os.path.basename(rpath):
-                    m_struct = parser.get_structure('m', rpath)
-                    t_atoms, m_atoms = [], []
-                    m_map = {}
-                    for model in m_struct:
-                        for chain in model:
-                            for res in chain:
-                                if res.has_id('CA'):
-                                    m_map[(chain.id, res.id[1])] = res['CA']
-                    for model in target_struct:
-                        for chain in model:
-                            for res in chain:
-                                if res.has_id('CA'):
-                                    k = (chain.id, res.id[1])
-                                    if k in m_map:
-                                        t_atoms.append(res['CA'])
-                                        m_atoms.append(m_map[k])
-                    if t_atoms:
-                        sup = Superimposer()
-                        sup.set_atoms(t_atoms, m_atoms)
-                        sup.apply(m_struct.get_atoms())
-                        io = PDBIO()
-                        io.set_structure(m_struct)
-                        io.save(rpath)
-                        logger.info(f"  Aligned {os.path.basename(rpath)} to {os.path.basename(pocket_path)} space ({len(t_atoms)} CA pairs)")
+                basename = os.path.basename(rpath)
+                if "conformix_var_" not in basename:
+                    new_receptor_paths.append(rpath)
+                    continue
+
+                m_struct = parser.get_structure("m", rpath)
+                m_residues = _standard_ca_residues(m_struct)
+
+                if len(m_residues) != len(ref_residues):
+                    logger.error(
+                        f"  ⚠ {basename}: residue count mismatch vs. {reference_pdb} "
+                        f"({len(m_residues)} vs {len(ref_residues)}). Skipping alignment "
+                        f"for this variant — refusing to fit a garbage pairing."
+                    )
+                    new_receptor_paths.append(rpath)
+                    continue
+
+                mismatches = sum(
+                    1 for a, b in zip(ref_residues, m_residues)
+                    if a.get_resname() != b.get_resname()
+                )
+                if mismatches:
+                    logger.error(
+                        f"  ⚠ {basename}: {mismatches} residue-name mismatches at matched "
+                        f"sequence positions vs. {reference_pdb}. Skipping alignment for "
+                        f"this variant."
+                    )
+                    new_receptor_paths.append(rpath)
+                    continue
+
+                t_atoms = [r["CA"] for r in ref_residues]
+                m_atoms = [r["CA"] for r in m_residues]
+                sup = Superimposer()
+                sup.set_atoms(t_atoms, m_atoms)
+
+                if sup.rms > RMSD_FAIL_THRESHOLD:
+                    logger.error(
+                        f"  ⚠ {basename}: post-fit CA RMSD {sup.rms:.2f} Å exceeds the "
+                        f"{RMSD_FAIL_THRESHOLD} Å sanity threshold. Skipping alignment for "
+                        f"this variant."
+                    )
+                    new_receptor_paths.append(rpath)
+                    continue
+
+                sup.apply(list(m_struct.get_atoms()))
+                aligned_path = os.path.join(aligned_dir, basename)
+                io = PDBIO()
+                io.set_structure(m_struct)
+                io.save(aligned_path)
+                new_receptor_paths.append(aligned_path)
+                logger.info(
+                    f"  Aligned {basename} to {os.path.basename(reference_pdb)} "
+                    f"(RMSD {sup.rms:.2f} Å, {len(t_atoms)} CA pairs) -> {aligned_path}"
+                )
+
+            receptor_paths = new_receptor_paths
         except Exception as e:
             logger.warning(f"  ⚠ Failed to structurally align variants: {e}")
+    else:
+        logger.warning(
+            f"  ⚠ Reference structure {reference_pdb} not found — skipping alignment. "
+            "Download it with: curl -L https://files.rcsb.org/download/"
+            f"{metadata.get('pdb_id')}.pdb -o {reference_pdb}"
+        )
+
+    # ── 4.6. Real rigid-crystal baseline ──────────────────────────────────────────────────
+    # The payload's pocket.pdb / <pdb_id>_pocket.pdb is an ~8-residue crop used only to
+    # condition DiffSBDD generation. Docking against it as a "baseline" is meaningless (it
+    # has too few atoms to contact most ligand poses). Use the full, waters/native-ligand
+    # -stripped crystal structure instead, so the baseline-vs-induced-fit differential
+    # reflects real conformational plasticity rather than an atom-count artifact.
+    receptor_paths = [
+        p for p in receptor_paths if "pocket.pdb" not in os.path.basename(p)
+    ]
+    BASELINE_RECEPTOR_NAME = f"{metadata.get('pdb_id')}_baseline_crystal.pdb"
+
+    if os.path.exists(reference_pdb):
+        from Bio.PDB import Select
+
+        class _StripHetero(Select):
+            def accept_residue(self, residue):
+                # Drop crystallographic waters and the native co-crystallized ligand,
+                # but keep catalytic/structural metal ions.
+                resname = residue.get_resname().strip().upper()
+                return resname not in ("HOH", "WAT", "BEN")
+
+        baseline_path = os.path.join(aligned_dir, BASELINE_RECEPTOR_NAME)
+        parser = PDBParser(QUIET=True)
+        ref_struct = parser.get_structure("ref_baseline", reference_pdb)
+        io = PDBIO()
+        io.set_structure(ref_struct)
+        io.save(baseline_path, _StripHetero())
+        receptor_paths.append(baseline_path)
+        logger.info(f"  Using full crystal structure as rigid baseline: {baseline_path}")
+    else:
+        logger.warning(
+            "  ⚠ No reference structure available for baseline; "
+            "baseline_affinity will be null for this run."
+        )
 
     # ── 5. Run the ensemble docking matrix ────────────────────────────────
     work_dir = os.path.join("results", "ensemble_audit")
