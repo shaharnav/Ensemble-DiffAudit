@@ -33,11 +33,13 @@ frontend/.env.local
 
 # Directories
 bin/
-pdbs/
 
 # Maintain directory structures for generated outputs and inputs with READMEs
 /ensemble_input/*
 !/ensemble_input/README.md
+
+/pdbs/*
+!/pdbs/README.md
 
 /results/*
 !/results/README.md

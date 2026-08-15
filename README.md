@@ -2,7 +2,7 @@
 
 Ensemble-DiffAudit is a high-throughput computational biology pipeline integrating Generative Structure-Based Drug Design (DiffSBDD) with dynamic protein conformational breathing (ConforMix & Boltz). It systematically generates *de novo* ligands and cross-docks every candidate against every conformer of an induced-fit structural ensemble via AutoDock Vina, auditing binding affinity across the full M×N matrix rather than a single rigid structure.
 
-**[Live demo](https://ensemble-diff-audit.vercel.app/)** — trypsin (PDB 3PTB), 3 DiffSBDD-generated candidates docked against a 6-conformer breathing receptor ensemble, rendered as an interactive 4D denoising-trajectory viewer. Static build, no backend required (see [`frontend/README` setup below](#frontend--live-demo)).
+**[Live demo](https://ensemble-diff-audit.vercel.app/)** — trypsin (PDB 3PTB), 3 DiffSBDD-generated candidates docked against a 6-conformer breathing receptor ensemble, rendered as an interactive 4D denoising-trajectory viewer. Static build, no backend required (see the [Frontend & Live Demo](#frontend--live-demo) section below).
 
 ## Local Environment Setup
 Before executing the auditor locally, you must hydrate the Python environment and download the AutoDock Vina binary solver.
@@ -18,8 +18,16 @@ Before executing the auditor locally, you must hydrate the Python environment an
    ```bash
    mkdir -p bin
    # Example: Downloading macOS ARM binary
-   curl -L https://github.com/ccsb-scripps/AutoDock-Vina/releases/download/v1.2.5/vina_1.2.5_mac_catalina_arm64 -o bin/vina_1.2.7_mac_aarch64
+   curl -L https://github.com/ccsb-scripps/AutoDock-Vina/releases/download/v1.2.7/vina_1.2.7_mac_aarch64 -o bin/vina_1.2.7_mac_aarch64
    chmod +x bin/vina_1.2.7_mac_aarch64
+   ```
+   (Swap the asset name for your platform — see the [v1.2.7 release assets](https://github.com/ccsb-scripps/AutoDock-Vina/releases/tag/v1.2.7) for Linux/Windows/x86_64 builds.)
+3. **Calibrate the engine (recommended)**: verify the docking engine reproduces a known result
+   before trusting any candidate affinity — dock benzamidine against a fresh trypsin download
+   and check it lands in the -6.0 to -7.0 kcal/mol range:
+   ```bash
+   curl -L https://files.rcsb.org/download/3PTB.pdb -o pdbs/3PTB.pdb
+   ./venv/bin/python calibrate.py
    ```
 
 ## Usage: $M \times N$ Ensemble Pipeline
@@ -27,7 +35,7 @@ Before executing the auditor locally, you must hydrate the Python environment an
 ### 1. Cloud Generation (Colab)
 To generate your candidate libraries and protein structural states, open the `diffsbdd_generation.ipynb` notebook in a Google Colab GPU-runtime instance.
 
-1. **Configure Parameters (Cell 1):** Set your target `PDB_ID`, select your critical `subset_residues`, and define `N_SAMPLES` to control how many *de novo* molecular geometries DiffSBDD synthesizes.
+1. **Configure Parameters (Cell 1):** Set your target `PDB_ID` and `N_SAMPLES` (how many *de novo* molecular geometries DiffSBDD synthesizes). **`POCKET_CENTER` matters more than anything else here** — a mis-centered pocket conditions the model on the wrong (often flat, non-binding) surface patch, capping every downstream affinity regardless of docking-engine tuning. Get it from the true binding site, e.g. the centroid of a co-crystallized ligand's HETATM coordinates, not a guess. `POCKET_RADIUS` should be large enough (≥12 Å) to include the full catalytic pocket, not just its rim.
 2. **Tune ConforMix Flexibility:** Scroll down to the `run_conformixrmsd_boltz` cell. 
    - `--num-twist-targets`: Controls the quantity of unique structural variations (e.g., set to 5 for a robust ensemble).
    - `--twist-target-stop`: Controls the maximal root-mean-square deviation (RMSD) opening limit (highly recommended to stay at `2.0` Å to capture natural "loop breathing" without breaking the pocket).
@@ -57,7 +65,7 @@ When computation halts, the original payload safely relocates into the timestamp
   ```
   - **Affinity**: The best ("induced-fit") energy achieved across the ConforMix conformational ensemble.
   - **Baseline**: What that identical drug scored against the full, rigid crystal structure (waters and the native co-crystallized ligand stripped). The differential between Affinity and Baseline is real *only* if the ensemble's conformers actually differ from the crystal at the binding site — check the per-conformer CA RMSD before reading a small differential as "no induced fit." With the current 3PTB ensemble (`--subset-residues "40-60"`, `--twist-target-stop 2.0`), pocket-lining CA displacement is ~0.2-0.4 Å, so most of the differential you'll see is Vina sampling noise, not plasticity.
-  - **ID**: Look up `Cmpd-0083` strictly within your `results/payload_unpacked/valid_trajectories/` directory. Fetching `mol_0083.xyz` lets you pipe the perfect generated coordinates into your downstream visual render engines linearly with no ambiguity.
+  - **ID**: Look up `Cmpd-0001` strictly within your `results/payload_unpacked/valid_trajectories/` directory. Fetching `mol_0001.xyz` lets you pipe the perfect generated coordinates into your downstream visual render engines linearly with no ambiguity.
 
 ## Frontend & Live Demo
 
