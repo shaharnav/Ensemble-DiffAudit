@@ -44,7 +44,7 @@ N_NULL_SAMPLES = 10000
 RNG_SEED = 42
 
 
-def _standard_ca_residues(structure, chain_id=CHAIN_ID):
+def _standard_ca_residues(structure, chain_id):
     return [
         res
         for res in structure[0][chain_id]
@@ -80,16 +80,19 @@ def _sequence_align_residues(apo_residues, holo_residues):
     return pairs
 
 
-def get_ligand_centroid(structure, chain_id=CHAIN_ID, ligand_code=LIGAND_CODE):
-    het_id = f"H_{ligand_code}"
+def get_ligand_centroid(structure, chain_id, ligand_codes):
+    """ligand_codes: iterable of PDB HETATM residue codes (e.g. {"TOP"} or {"NDP", "TOP"})."""
+    het_ids = {f"H_{code}" for code in ligand_codes}
+    coords = []
     for res in structure[0][chain_id]:
-        if res.id[0] == het_id:
-            coords = np.array([atom.get_coord() for atom in res if atom.element != "H"])
-            return coords.mean(axis=0)
-    raise ValueError(f"Ligand {ligand_code} not found in chain {chain_id}")
+        if res.id[0] in het_ids:
+            coords.extend(atom.get_coord() for atom in res if atom.element != "H")
+    if not coords:
+        raise ValueError(f"None of {ligand_codes} found in chain {chain_id}")
+    return np.mean(np.array(coords), axis=0)
 
 
-def find_pocket_lining_residues(structure, ligand_centroid, cutoff, chain_id=CHAIN_ID):
+def find_pocket_lining_residues(structure, ligand_centroid, cutoff, chain_id):
     lining = []
     for res in structure[0][chain_id]:
         if res.id[0] != " " or not res.has_id("CA"):
@@ -103,25 +106,36 @@ def find_pocket_lining_residues(structure, ligand_centroid, cutoff, chain_id=CHA
     return lining
 
 
-def compute_apo_holo_geometry(cutoff=DEFAULT_CUTOFF):
-    parser = PDBParser(QUIET=True)
-    apo_structure = parser.get_structure("apo", APO_PDB)
-    holo_structure = parser.get_structure("holo", HOLO_PDB)
+def compute_apo_holo_geometry(apo_pdb=None, holo_pdb=None, apo_chain=CHAIN_ID,
+                               holo_chain=CHAIN_ID, ligand_codes=None, cutoff=DEFAULT_CUTOFF):
+    apo_pdb = apo_pdb or APO_PDB
+    holo_pdb = holo_pdb or HOLO_PDB
+    ligand_codes = ligand_codes or {LIGAND_CODE}
 
-    apo_residues = _standard_ca_residues(apo_structure)
-    holo_residues = _standard_ca_residues(holo_structure)
+    parser = PDBParser(QUIET=True)
+    apo_structure = parser.get_structure("apo", apo_pdb)
+    holo_structure = parser.get_structure("holo", holo_pdb)
+
+    apo_residues = _standard_ca_residues(apo_structure, apo_chain)
+    holo_residues = _standard_ca_residues(holo_structure, holo_chain)
     pairs = _sequence_align_residues(apo_residues, holo_residues)
     logger.info(f"{len(pairs)} residues matched by sequence-alignment index "
                 f"({len(apo_residues)} apo, {len(holo_residues)} holo)")
+    if len(pairs) < 20:
+        raise ValueError(f"Only {len(pairs)} residues matched -- apo/holo chains likely "
+                          f"aren't the same construct.")
 
-    ligand_centroid = get_ligand_centroid(holo_structure)
-    logger.info(f"Holo ligand ({LIGAND_CODE}) centroid: {ligand_centroid}")
+    ligand_centroid = get_ligand_centroid(holo_structure, holo_chain, ligand_codes)
+    logger.info(f"Holo ligand ({ligand_codes}) centroid: {ligand_centroid}")
 
-    lining_holo = find_pocket_lining_residues(holo_structure, ligand_centroid, cutoff)
+    lining_holo = find_pocket_lining_residues(holo_structure, ligand_centroid, cutoff, holo_chain)
     lining_holo_ids = {id(r) for r in lining_holo}
     pocket_pairs = [(a, h) for a, h in pairs if id(h) in lining_holo_ids]
     logger.info(f"{len(pocket_pairs)} pocket-lining residues within {cutoff} A of ligand "
                 f"centroid, present in both apo and holo")
+    if len(pocket_pairs) < 3:
+        raise ValueError(f"Only {len(pocket_pairs)} pocket-lining residues resolved in both "
+                          f"structures -- too few for a stable RMSD.")
 
     # Global superposition: align apo onto holo using ALL matched CA atoms (not just
     # pocket), so pocket displacement is measured in a frame fixed by the whole protein,
@@ -161,8 +175,8 @@ def compute_apo_holo_geometry(cutoff=DEFAULT_CUTOFF):
     max_residue_id = pocket_pairs[max_idx][1].id
 
     result = {
-        "apo_pdb": APO_PDB,
-        "holo_pdb": HOLO_PDB,
+        "apo_pdb": apo_pdb,
+        "holo_pdb": holo_pdb,
         "n_residues_matched": len(pairs),
         "n_pocket_residues": len(pocket_pairs),
         "cutoff_angstrom": cutoff,
@@ -221,14 +235,14 @@ def compute_directional_gain(pocket_pairs, rot, tran, apo_holo_pocket_ca_rmsd, c
     parser = PDBParser(QUIET=True)
     holo_structure = parser.get_structure("holo", HOLO_PDB)
     apo_structure = parser.get_structure("apo", APO_PDB)
-    apo_residues = _standard_ca_residues(apo_structure)
+    apo_residues = _standard_ca_residues(apo_structure, CHAIN_ID)
 
     rows = []
     conformer_holo_rmsds = []
     apo_conformer_rmsds = []
     for conf_path in conformer_paths:
         conf_structure = parser.get_structure("conf", conf_path)
-        conf_residues = _standard_ca_residues(conf_structure)
+        conf_residues = _standard_ca_residues(conf_structure, CHAIN_ID)
         if len(conf_residues) != len(apo_residues):
             raise ValueError(
                 f"{conf_path}: {len(conf_residues)} residues vs apo's {len(apo_residues)} "
