@@ -30,6 +30,7 @@ import json
 import logging
 import os
 import shutil
+import statistics
 import sys
 import tempfile
 import zipfile
@@ -319,6 +320,66 @@ def dock_one(
 
 
 # ---------------------------------------------------------------------------
+# Pure aggregation: crystal vs. ensemble metrics for one candidate
+# ---------------------------------------------------------------------------
+def aggregate_candidate_affinities(all_affinities: dict[str, float]) -> dict:
+    """
+    Given {receptor_basename: affinity} for one ligand, split into the crystal
+    baseline vs. the conformer ensemble and compute the Phase-1 metric set.
+
+    A receptor is treated as the crystal baseline if its basename contains
+    'baseline_crystal.pdb'; everything else is an ensemble conformer.
+    """
+    baseline_affinity: float | None = None
+    ensemble_affinities: list[float] = []
+    ensemble_best_affinity: float | None = None
+    ensemble_best_conformer: str = ""
+    best_affinity: float | None = None
+    best_conformation: str = ""
+
+    for pdb_basename, affinity in all_affinities.items():
+        if 'baseline_crystal.pdb' in pdb_basename:
+            baseline_affinity = affinity
+        else:
+            ensemble_affinities.append(affinity)
+            if ensemble_best_affinity is None or affinity < ensemble_best_affinity:
+                ensemble_best_affinity = affinity
+                ensemble_best_conformer = pdb_basename
+
+        if best_affinity is None or affinity < best_affinity:
+            best_affinity = affinity
+            best_conformation = pdb_basename
+
+    if ensemble_affinities:
+        ensemble_mean_affinity = statistics.mean(ensemble_affinities)
+        ensemble_sd_affinity = (
+            statistics.stdev(ensemble_affinities) if len(ensemble_affinities) > 1 else 0.0
+        )
+        ensemble_range_affinity = max(ensemble_affinities) - min(ensemble_affinities)
+    else:
+        ensemble_mean_affinity = None
+        ensemble_sd_affinity = None
+        ensemble_range_affinity = None
+
+    if baseline_affinity is not None and ensemble_best_affinity is not None:
+        delta_ensemble_vs_crystal = baseline_affinity - ensemble_best_affinity
+    else:
+        delta_ensemble_vs_crystal = None
+
+    return {
+        "crystal_affinity": baseline_affinity,
+        "ensemble_best_affinity": ensemble_best_affinity,
+        "ensemble_best_conformer": ensemble_best_conformer,
+        "ensemble_mean_affinity": ensemble_mean_affinity,
+        "ensemble_sd_affinity": ensemble_sd_affinity,
+        "ensemble_range_affinity": ensemble_range_affinity,
+        "overall_best_affinity": best_affinity,
+        "overall_best_structure": best_conformation,
+        "delta_ensemble_vs_crystal": delta_ensemble_vs_crystal,
+    }
+
+
+# ---------------------------------------------------------------------------
 # Core: N×M ensemble matrix
 # ---------------------------------------------------------------------------
 def run_ensemble(
@@ -352,10 +413,7 @@ def run_ensemble(
             f"{'…' if len(smiles) > 60 else ''}"
         )
 
-        best_affinity: float | None = None
-        best_h_bonds: int = 0
-        best_conformation: str = ""
-        baseline_affinity: float | None = None
+        h_bonds_by_receptor: dict[str, int] = {}
         all_affinities: dict[str, float] = {}
 
         for pdb_path in receptor_paths:
@@ -374,40 +432,40 @@ def run_ensemble(
                 box_size=box_size,
             )
 
-            # Keep the most negative (lowest) affinity score — induced-fit winner
             if affinity is not None:
                 all_affinities[pdb_basename] = affinity
-                
-                if 'baseline_crystal.pdb' in pdb_basename:
-                    baseline_affinity = affinity
-                    
-                if best_affinity is None or affinity < best_affinity:
-                    best_affinity = affinity
-                    best_h_bonds = h_bonds
-                    best_conformation = pdb_basename
+                h_bonds_by_receptor[pdb_basename] = h_bonds
 
-        if best_affinity is None:
+        if not all_affinities:
             logger.warning(
                 f"  All docking attempts failed for SMILES index {si}. "
                 "Candidate will still appear in output with null affinity."
             )
 
+        metrics = aggregate_candidate_affinities(all_affinities)
+        best_h_bonds = h_bonds_by_receptor.get(metrics["overall_best_structure"], 0)
+
         candidates.append(
             {
                 "smiles": smiles,
-                "true_affinity": best_affinity,
-                "winning_conformation": best_conformation,
+                # Deprecated aliases — kept for backward compatibility with results.csv
+                # consumers. `true_affinity` == overall_best_affinity (max over crystal ∪
+                # conformers); `baseline_affinity` == crystal_affinity.
+                "true_affinity": metrics["overall_best_affinity"],
+                "winning_conformation": metrics["overall_best_structure"],
                 "h_bond_count": best_h_bonds,
-                "baseline_affinity": baseline_affinity,
+                "baseline_affinity": metrics["crystal_affinity"],
                 "all_affinities": all_affinities,
+                # Phase 1 metric set — see plan: the differential must be able to go negative.
+                **metrics,
             }
         )
 
     # Global ranking: most negative affinity first; failures sink to the bottom
     candidates.sort(
         key=lambda c: (
-            c["true_affinity"] is None,          # None → sort last
-            c["true_affinity"] if c["true_affinity"] is not None else 0.0,
+            c["overall_best_affinity"] is None,          # None → sort last
+            c["overall_best_affinity"] if c["overall_best_affinity"] is not None else 0.0,
         )
     )
 
@@ -640,19 +698,36 @@ def run_payload_mode(
             receptors.update(r.get("all_affinities", {}).keys())
         receptors = sorted(list(receptors))
         
-        headers = ["ID", "SMILES", "True_Affinity", "Baseline_Affinity", "H_Bonds", "Winning_Conformation", "QED", "SA_Score"] + receptors
+        headers = [
+            "ID", "SMILES",
+            "crystal_affinity", "ensemble_best_affinity", "ensemble_best_conformer",
+            "ensemble_mean_affinity", "ensemble_sd_affinity", "ensemble_range_affinity",
+            "overall_best_affinity", "overall_best_structure", "delta_ensemble_vs_crystal",
+            "H_Bonds", "QED", "SA_Score",
+            # Deprecated aliases: True_Affinity == overall_best_affinity, Baseline_Affinity == crystal_affinity
+            "True_Affinity", "Baseline_Affinity", "Winning_Conformation",
+        ] + receptors
         writer.writerow(headers)
-        
+
         for r in ranked:
             row = [
                 r.get("id", "N/A"),
                 r["smiles"],
+                r.get("crystal_affinity", ""),
+                r.get("ensemble_best_affinity", ""),
+                r.get("ensemble_best_conformer", ""),
+                r.get("ensemble_mean_affinity", ""),
+                r.get("ensemble_sd_affinity", ""),
+                r.get("ensemble_range_affinity", ""),
+                r.get("overall_best_affinity", ""),
+                r.get("overall_best_structure", ""),
+                r.get("delta_ensemble_vs_crystal", ""),
+                r.get("h_bond_count", ""),
+                r.get("qed", ""),
+                r.get("sa_score", ""),
                 r.get("true_affinity", ""),
                 r.get("baseline_affinity", ""),
-                r.get("h_bond_count", ""),
                 r.get("winning_conformation", ""),
-                r.get("qed", ""),
-                r.get("sa_score", "")
             ]
             for rec in receptors:
                 row.append(r.get("all_affinities", {}).get(rec, ""))
