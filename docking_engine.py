@@ -12,6 +12,31 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 VINA_PATH = os.path.abspath("./bin/vina_1.2.7_mac_aarch64")
 MK_PREPARE_RECEPTOR = os.path.abspath("./venv/bin/mk_prepare_receptor.py")
 
+
+def compute_parallel_plan(total_cpus=None, reserve_cores=1, min_cpu_per_job=2):
+    """
+    Docking jobs are independent (distinct job_name -> distinct output files), so
+    several can run concurrently via a thread pool (subprocess.run releases the
+    GIL while Vina itself runs, so threads -- not processes -- are enough).
+
+    This derives (num_workers, vina_cpu_per_job) FROM THE MACHINE IT RUNS ON via
+    os.cpu_count() -- it does not hardcode a particular core count. If you move
+    this pipeline to a machine with fewer (or more) cores, this automatically
+    adjusts; you don't need to touch the worker count by hand. `reserve_cores`
+    keeps a core or two free for the OS/other work rather than saturating 100%.
+
+    Example on a 10-core machine: 10 - 1 reserved = 9 available; at 2 cpu/job
+    that's 4 concurrent workers (8 cores used, 1 idle/reserved).
+    On a 4-core machine: 4 - 1 = 3 available; min_cpu_per_job=2 means only 1
+    worker fits, so this correctly falls back to the old sequential behavior
+    instead of thrashing.
+    """
+    total_cpus = total_cpus if total_cpus is not None else (os.cpu_count() or 4)
+    available = max(total_cpus - reserve_cores, min_cpu_per_job)
+    num_workers = max(1, available // min_cpu_per_job)
+    vina_cpu_per_job = min_cpu_per_job if num_workers > 1 else total_cpus
+    return num_workers, vina_cpu_per_job
+
 def prepare_receptor(pdb_file, output_pdbqt):
     """
     Prepares a PDB file for docking using Meeko's mk_prepare_receptor (maintained by the
@@ -139,7 +164,7 @@ def prepare_ligand(smiles, output_pdbqt):
         logging.error(f"Error preparing ligand: {e}")
         return False
 
-def run_docking(pdb_file, smiles, output_dir="./results", job_name="job", exhaustiveness=32, target_residue=None, center_coords=None, box_size=None, seed=42, num_modes=9):
+def run_docking(pdb_file, smiles, output_dir="./results", job_name="job", exhaustiveness=32, target_residue=None, center_coords=None, box_size=None, seed=42, num_modes=9, vina_cpu=4):
     """
     Runs Vina docking.
 
@@ -149,6 +174,10 @@ def run_docking(pdb_file, smiles, output_dir="./results", job_name="job", exhaus
         box_size:      Optional explicit [sx, sy, sz] search box dimensions.
         seed:          Vina random seed, for reproducibility across runs.
         num_modes:     Number of binding modes Vina should generate.
+        vina_cpu:      Threads Vina itself uses (its own --cpu flag). When running
+                       several dock_one() calls concurrently (see
+                       compute_parallel_plan()), this should be lowered so that
+                       concurrent_jobs * vina_cpu doesn't oversubscribe the machine.
     """
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
@@ -240,7 +269,7 @@ def run_docking(pdb_file, smiles, output_dir="./results", job_name="job", exhaus
         "--size_x", str(size[0]),
         "--size_y", str(size[1]),
         "--size_z", str(size[2]),
-        "--cpu", "4",
+        "--cpu", str(vina_cpu),
         "--exhaustiveness", str(exhaustiveness),
         "--seed", str(seed),
         "--num_modes", str(num_modes),

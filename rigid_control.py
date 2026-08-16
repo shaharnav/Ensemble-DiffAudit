@@ -25,7 +25,9 @@ import os
 import statistics
 import sys
 
-from docking_engine import run_docking
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
+from docking_engine import run_docking, compute_parallel_plan
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -172,36 +174,60 @@ def main() -> int:
 
     os.makedirs(RIGID_WORK_DIR, exist_ok=True)
 
-    rows = []
-    for idx, cand in enumerate(candidates):
+    # Jobs are independent (distinct job_name -> distinct output files), so dock
+    # them concurrently instead of one seed at a time. num_workers/vina_cpu are
+    # derived from THIS machine's core count (see compute_parallel_plan's
+    # docstring) -- on a smaller machine this automatically falls back toward
+    # fewer workers / more cpu-per-job, down to the old fully-sequential behavior.
+    num_workers, vina_cpu = compute_parallel_plan()
+    logger.info(f"Parallel plan: {num_workers} concurrent job(s), {vina_cpu} Vina thread(s) each")
+
+    jobs = [
+        (idx, cand, seed)
+        for idx, cand in enumerate(candidates)
+        for seed in seeds
+    ]
+
+    def _run_one(idx, cand, seed):
         smiles = cand["smiles"]
         cand_id = cand.get("id", f"idx{idx}")
-        ensemble_best_affinity = cand.get("ensemble_best_affinity")
+        job_name = f"rigid_{cand_id}_seed{seed}"
+        result = run_docking(
+            pdb_file=baseline_receptor,
+            smiles=smiles,
+            output_dir=RIGID_WORK_DIR,
+            job_name=job_name,
+            exhaustiveness=docking_params["exhaustiveness"],
+            center_coords=docking_params["center"],
+            box_size=docking_params["size"],
+            seed=seed,
+            vina_cpu=vina_cpu,
+        )
+        affinity = result["affinity"] if result and result.get("affinity") is not None else None
+        return cand_id, seed, affinity
 
-        logger.info(f"[{idx + 1}/{len(candidates)}] {cand_id}: {smiles[:60]}")
-
-        scores = []
-        for seed in seeds:
-            job_name = f"rigid_{cand_id}_seed{seed}"
-            result = run_docking(
-                pdb_file=baseline_receptor,
-                smiles=smiles,
-                output_dir=RIGID_WORK_DIR,
-                job_name=job_name,
-                exhaustiveness=docking_params["exhaustiveness"],
-                center_coords=docking_params["center"],
-                box_size=docking_params["size"],
-                seed=seed,
-            )
-            if result is None or result.get("affinity") is None:
-                logger.warning(f"  ✗ Docking failed for seed {seed}.")
+    scores_by_cand: dict[str, list[float]] = {}
+    completed = 0
+    with ThreadPoolExecutor(max_workers=num_workers) as pool:
+        futures = [pool.submit(_run_one, idx, cand, seed) for idx, cand, seed in jobs]
+        for future in as_completed(futures):
+            cand_id, seed, affinity = future.result()
+            completed += 1
+            if affinity is None:
+                logger.warning(f"  ✗ [{completed}/{len(jobs)}] {cand_id} seed={seed}: docking failed")
                 continue
-            affinity = result["affinity"]
-            scores.append(affinity)
-            logger.info(f"  seed={seed}: affinity={affinity:.3f} kcal/mol")
+            scores_by_cand.setdefault(cand_id, []).append(affinity)
+            logger.info(f"  [{completed}/{len(jobs)}] {cand_id} seed={seed}: affinity={affinity:.3f} kcal/mol")
+
+    rows = []
+    for idx, cand in enumerate(candidates):
+        cand_id = cand.get("id", f"idx{idx}")
+        smiles = cand["smiles"]
+        ensemble_best_affinity = cand.get("ensemble_best_affinity")
+        scores = scores_by_cand.get(cand_id, [])
 
         if not scores:
-            logger.warning(f"  All rigid-control docking runs failed for {cand_id}.")
+            logger.warning(f"All rigid-control docking runs failed for {cand_id}.")
             summary = {"rigid_max": None, "rigid_mean": None, "rigid_sd": None,
                        "rigid_range": None, "noise_corrected_delta": None}
         else:

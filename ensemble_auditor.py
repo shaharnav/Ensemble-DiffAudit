@@ -36,7 +36,9 @@ import tempfile
 import time
 import zipfile
 
-from docking_engine import run_docking
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
+from docking_engine import run_docking, compute_parallel_plan
 from analyzer import analyze_docking
 
 # ---------------------------------------------------------------------------
@@ -285,6 +287,7 @@ def dock_one(
     target_residue: str | None,
     center_coords=None,
     box_size=None,
+    vina_cpu: int = 4,
 ) -> tuple[float | None, int, str]:
     """
     Dock *smiles* against *pdb_path*.
@@ -303,6 +306,7 @@ def dock_one(
         target_residue=target_residue,
         center_coords=center_coords,
         box_size=box_size,
+        vina_cpu=vina_cpu,
     )
 
     if result is None or result.get("affinity") is None:
@@ -414,40 +418,62 @@ def run_ensemble(
         f"({total_jobs} total docking jobs)."
     )
 
-    candidates: list[dict] = []
+    # Jobs are independent (distinct job_name -> distinct output files), so dock
+    # them concurrently instead of one (smiles, receptor) pair at a time.
+    # num_workers/vina_cpu are derived from THIS machine's core count (see
+    # compute_parallel_plan's docstring) -- on a smaller machine this
+    # automatically falls back toward fewer workers / more cpu-per-job, down to
+    # the old fully-sequential behavior.
+    num_workers, vina_cpu = compute_parallel_plan()
+    logger.info(f"Parallel plan: {num_workers} concurrent job(s), {vina_cpu} Vina thread(s) each")
 
-    for si, smiles in enumerate(smiles_list):
-        logger.info(
-            f"\n[{si + 1}/{n_smiles}] SMILES: {smiles[:60]}"
-            f"{'…' if len(smiles) > 60 else ''}"
+    jobs = [
+        (si, smiles, pdb_path)
+        for si, smiles in enumerate(smiles_list)
+        for pdb_path in receptor_paths
+    ]
+
+    def _run_one(si, smiles, pdb_path):
+        pdb_basename = os.path.basename(pdb_path)
+        job_name = make_job_name(smiles, pdb_path, si)
+        affinity, h_bonds, docked_file = dock_one(
+            smiles=smiles,
+            pdb_path=pdb_path,
+            job_name=job_name,
+            work_dir=work_dir,
+            exhaustiveness=exhaustiveness,
+            target_residue=target_residue,
+            center_coords=center_coords,
+            box_size=box_size,
+            vina_cpu=vina_cpu,
         )
+        return si, pdb_basename, affinity, h_bonds
 
-        h_bonds_by_receptor: dict[str, int] = {}
-        all_affinities: dict[str, float] = {}
-
-        for pdb_path in receptor_paths:
-            pdb_basename = os.path.basename(pdb_path)
-            job_name = make_job_name(smiles, pdb_path, si)
-
-            logger.info(f"  Docking vs. {pdb_basename} …")
-            affinity, h_bonds, docked_file = dock_one(
-                smiles=smiles,
-                pdb_path=pdb_path,
-                job_name=job_name,
-                work_dir=work_dir,
-                exhaustiveness=exhaustiveness,
-                target_residue=target_residue,
-                center_coords=center_coords,
-                box_size=box_size,
-            )
-
+    results_by_si: dict[int, dict] = {si: {"all_affinities": {}, "h_bonds_by_receptor": {}} for si in range(n_smiles)}
+    completed = 0
+    with ThreadPoolExecutor(max_workers=num_workers) as pool:
+        futures = [pool.submit(_run_one, si, smiles, pdb_path) for si, smiles, pdb_path in jobs]
+        for future in as_completed(futures):
+            si, pdb_basename, affinity, h_bonds = future.result()
+            completed += 1
             if affinity is not None:
-                all_affinities[pdb_basename] = affinity
-                h_bonds_by_receptor[pdb_basename] = h_bonds
+                results_by_si[si]["all_affinities"][pdb_basename] = affinity
+                results_by_si[si]["h_bonds_by_receptor"][pdb_basename] = h_bonds
+                logger.info(
+                    f"  [{completed}/{total_jobs}] s{si:04d} vs. {pdb_basename}: "
+                    f"affinity={affinity:.2f} kcal/mol"
+                )
+            else:
+                logger.warning(f"  ✗ [{completed}/{total_jobs}] s{si:04d} vs. {pdb_basename}: failed")
+
+    candidates: list[dict] = []
+    for si, smiles in enumerate(smiles_list):
+        all_affinities = results_by_si[si]["all_affinities"]
+        h_bonds_by_receptor = results_by_si[si]["h_bonds_by_receptor"]
 
         if not all_affinities:
             logger.warning(
-                f"  All docking attempts failed for SMILES index {si}. "
+                f"All docking attempts failed for SMILES index {si}. "
                 "Candidate will still appear in output with null affinity."
             )
 
@@ -686,7 +712,8 @@ def run_payload_mode(
             if os.path.exists(out_pdbqt) and os.path.getsize(out_pdbqt) > 0:
                 cached_jobs += 1
     jobs_to_run = total_jobs - cached_jobs
-    est_seconds = jobs_to_run * AVG_JOB_SECONDS
+    dry_run_workers, _ = compute_parallel_plan()
+    est_seconds = (jobs_to_run * AVG_JOB_SECONDS) / dry_run_workers
 
     logger.info(
         f"Matrix: {len(smiles_list)} candidates x {len(receptor_paths)} receptors "
@@ -694,7 +721,7 @@ def run_payload_mode(
     )
     logger.info(
         f"Estimated wall clock for jobs to run: ~{est_seconds / 60:.1f} min "
-        f"(at ~{AVG_JOB_SECONDS}s/job -- a rough average, not a guarantee)"
+        f"(at ~{AVG_JOB_SECONDS}s/job, {dry_run_workers} concurrent -- a rough average, not a guarantee)"
     )
 
     if dry_run:
