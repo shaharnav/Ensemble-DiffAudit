@@ -33,6 +33,7 @@ import shutil
 import statistics
 import sys
 import tempfile
+import time
 import zipfile
 
 from docking_engine import run_docking
@@ -110,6 +111,14 @@ def parse_args() -> argparse.Namespace:
         help=(
             "Optional active-site residue hint forwarded to get_center_and_size "
             "(e.g. 'ASN253'). Falls back through metal → cavity search if omitted."
+        ),
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help=(
+            "Report the number of docking jobs (and roughly how many are already "
+            "cached) plus an estimated wall clock, then exit without docking."
         ),
     )
     args = parser.parse_args()
@@ -475,11 +484,15 @@ def run_ensemble(
 # ---------------------------------------------------------------------------
 # Payload mode orchestrator
 # ---------------------------------------------------------------------------
+AVG_JOB_SECONDS = 15  # rough per-docking-job estimate, from observed local runs
+
+
 def run_payload_mode(
     payload_zip: str,
     output_path: str,
     exhaustiveness: int,
     target_residue: str | None,
+    dry_run: bool = False,
 ) -> None:
     """
     End-to-end pipeline: unzip → extract SMILES → dock → rank → save.
@@ -661,6 +674,34 @@ def run_payload_mode(
     os.makedirs(work_dir, exist_ok=True)
     logger.info(f"Intermediate docking files → '{work_dir}'")
 
+    total_jobs = len(smiles_list) * len(receptor_paths)
+    # Approximate cache check: a job is "already done" if its output PDBQT exists.
+    # This doesn't re-verify docking params match (docking_engine does that at run
+    # time and re-runs on mismatch) -- it's only meant to size the dry-run estimate.
+    cached_jobs = 0
+    for si in range(len(smiles_list)):
+        for rpath in receptor_paths:
+            job_name = make_job_name(smiles_list[si], rpath, si)
+            out_pdbqt = os.path.join(work_dir, f"{job_name}_out.pdbqt")
+            if os.path.exists(out_pdbqt) and os.path.getsize(out_pdbqt) > 0:
+                cached_jobs += 1
+    jobs_to_run = total_jobs - cached_jobs
+    est_seconds = jobs_to_run * AVG_JOB_SECONDS
+
+    logger.info(
+        f"Matrix: {len(smiles_list)} candidates x {len(receptor_paths)} receptors "
+        f"= {total_jobs} docking jobs ({cached_jobs} likely cached, {jobs_to_run} to run)"
+    )
+    logger.info(
+        f"Estimated wall clock for jobs to run: ~{est_seconds / 60:.1f} min "
+        f"(at ~{AVG_JOB_SECONDS}s/job -- a rough average, not a guarantee)"
+    )
+
+    if dry_run:
+        logger.info("--dry-run: exiting before docking.")
+        return
+
+    run_start = time.time()
     ranked = run_ensemble(
         smiles_list=smiles_list,
         receptor_paths=receptor_paths,
@@ -669,6 +710,24 @@ def run_payload_mode(
         target_residue=target_residue,
         center_coords=center_coords,
         box_size=box_size,
+    )
+    wall_clock_seconds = time.time() - run_start
+
+    performance = {
+        "total_jobs": total_jobs,
+        "cached_jobs_at_start": cached_jobs,
+        "jobs_run_this_session": jobs_to_run,
+        "cache_hit_rate_at_start": cached_jobs / total_jobs if total_jobs else None,
+        "wall_clock_seconds": wall_clock_seconds,
+        "docking_runs_per_hour": (
+            jobs_to_run / (wall_clock_seconds / 3600) if wall_clock_seconds > 0 and jobs_to_run else None
+        ),
+    }
+    with open("performance.json", "w") as fh:
+        json.dump(performance, fh, indent=2)
+    logger.info(
+        f"Performance: {wall_clock_seconds:.0f}s wall clock, "
+        f"{performance['docking_runs_per_hour'] or 0:.0f} runs/hour -> performance.json"
     )
 
     # ── 6. Enrich results with SDF properties (QED, SA) ───────────────────
@@ -769,6 +828,7 @@ def main() -> None:
             output_path=args.output,
             exhaustiveness=args.exhaustiveness,
             target_residue=args.target_residue,
+            dry_run=args.dry_run,
         )
     else:
         # ── Classic mode ──────────────────────────────────────────────────
