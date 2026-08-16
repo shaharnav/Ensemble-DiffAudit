@@ -5,7 +5,7 @@ Runs before any docking, so the independent variable (how far apo DHFR is from h
 whether the ConforMix ensemble moves toward holo) is fixed before any docking outcome is
 seen.
 
-2a — ground truth: aligns apo (2W9T) to holo (2W9S) chain A on the matched sequence region
+2a — ground truth: aligns apo (1RTC) to holo (1BR6) chain A on the matched sequence region
 (residues paired by sequence-alignment index, not PDB residue number -- see
 `_sequence_align_residues`), and reports pocket displacement.
 
@@ -32,10 +32,10 @@ from Bio.PDB.Polypeptide import protein_letters_3to1 as _three_to_one
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-APO_PDB = "pdbs/2W9T.pdb"
-HOLO_PDB = "pdbs/2W9S.pdb"
+APO_PDB = "pdbs/1RTC.pdb"
+HOLO_PDB = "pdbs/1BR6.pdb"
 CHAIN_ID = "A"
-LIGAND_CODE = "TOP"
+LIGAND_CODE = "PT1"
 DEFAULT_CUTOFF = 8.0
 CONFORMER_DIR = os.path.join("results", "experiment2", "apo_ensemble")
 GEOMETRY_CSV = "apo_holo_geometry.csv"
@@ -305,8 +305,8 @@ def compute_directional_gain(pocket_pairs, rot, tran, apo_holo_pocket_ca_rmsd, c
 def main() -> int:
     if not (os.path.exists(APO_PDB) and os.path.exists(HOLO_PDB)):
         logger.error(f"{APO_PDB} and/or {HOLO_PDB} not found. Fetch via "
-                      f"curl -L https://files.rcsb.org/download/2W9T.pdb -o {APO_PDB} "
-                      f"(and 2W9S similarly).")
+                      f"curl -L https://files.rcsb.org/download/1RTC.pdb -o {APO_PDB} "
+                      f"(and 1BR6 similarly).")
         return 1
 
     geometry, pocket_pairs, rot, tran = compute_apo_holo_geometry()

@@ -1,30 +1,44 @@
-# Pre-registration — Experiment 2 Pilot: DHFR Apo/Holo Cross-Docking
+# Pre-registration — Experiment 2 Pilot: Ricin A-Chain Apo/Holo Cross-Docking
 
 This document is committed before any ConforMix generation or docking run for this
 experiment. Any number reported for this pilot must postdate the commit hash of this file.
 
+## 0. Target swap (before any data was generated)
+
+The original pilot target was DHFR (2W9T/2W9S). It was swapped for ricin A chain before any
+ConforMix generation or docking ran, because the DHFR pair's confound was not just noise but
+an alternative explanation for the pilot's primary finding: 2W9S's pocket rearrangement (the
+Met20 loop) closes over NADPH's nicotinamide ring and is cofactor-driven, not
+inhibitor-driven, so an apo-conditioned sampler that never sees NADPH could not reach that
+conformation regardless of whether the sampling method works. A null result on that pair would
+have been ambiguous between H2 (mode collapse — informative) and "the target conformation
+requires a cofactor" (uninformative, true by construction) — indistinguishable, which defeats
+the pilot's purpose. See `targets.yaml`'s `target_swap_history` for the full reasoning. This is
+a stricter bar than "document it or pick a matched pair": a confound that supplies an
+alternative explanation for the primary finding must be removed, not merely disclosed.
+
 ## 1. Pilot target
 
-DHFR (*Staphylococcus aureus*), apo **2W9T**, holo **2W9S**. Verified against RCSB:
+Ricin A chain (*Ricinus communis*), apo **1RTC**, holo **1BR6**. Verified against RCSB:
 
-- 2W9T: 161-residue single construct, chains A/B, HETATM records contain only crystallographic
-  waters (136 HOH) — genuinely ligand-free and cofactor-free.
-- 2W9S: same 161-residue sequence (verified identical, no mutations), chains A–F, contains
-  trimethoprim (ligand code `TOP`, MW 290.3, drug-like) plus NADPH (`NDP`) and glycerol (`GOL`,
-  cryoprotectant, ignored).
+- 1RTC: 268-residue single-chain construct (chain A), full 268/268 residues modeled, no gaps.
+  HETATM records contain only crystallographic waters — genuinely ligand-free and
+  cofactor-free.
+- 1BR6: identical 268-residue sequence (verified, no mutations), full 268/268 residues modeled,
+  no gaps, chain A. Contains pteroic acid (ligand code `PT1`, MW 312.3, drug-like) and waters
+  only — **no cofactor in either structure**, so the only difference between apo and holo is
+  the inhibitor.
+- Mechanism: Tyr80 sidechain swings out of the way to open the active site on inhibitor
+  binding — documented in the CryptoSite cryptic-pocket benchmark, so this is a published
+  benchmark pair rather than one selected post hoc for a favorable outcome.
 - Chain A used from each structure.
-
-**Confound, retained rather than resolved by re-selecting a target:** 2W9S carries NADPH: 2W9T
-does not. Any measured apo→holo pocket rearrangement may be driven in part or in whole by
-cofactor binding rather than solely by trimethoprim binding. This is reported alongside every
-geometry and docking result in this pilot, not silently absorbed into the headline number.
 
 ## 2. Commitment
 
 **This target stays in the final ten-target panel and in the final writeup regardless of
-outcome.** A null result does not remove DHFR from the panel; a positive result does not
-exempt it from the panel's full statistical treatment. This line is what makes this a pilot
-rather than a search over targets for a favorable result.
+outcome.** A null result does not remove ricin A chain from the panel; a positive result does
+not exempt it from the panel's full statistical treatment. This line is what makes this a
+pilot rather than a search over targets for a favorable result.
 
 ## 3. Co-primary metrics
 
@@ -51,13 +65,14 @@ observed.
 
 ## 5. Ligand set (fixed, see `ligands.csv` and `targets.yaml`)
 
-- **Primary:** trimethoprim (`Cmpd-P01`), the native ligand of 2W9S, MW 290.3. Has a
+- **Primary:** pteroic acid (`Cmpd-P01`), the native ligand of 1BR6, MW 312.3. Has a
   crystallographic pose, so pose RMSD is measurable against ground truth in `holo_rigid`.
-- **Power set:** 10 ligands (`Cmpd-S01`–`Cmpd-S10`), known DHFR inhibitors drawn from other
-  DHFR co-crystal structures in the PDB (methotrexate, trimetrexate, brodimoprim-derivative,
-  and several pyridopyrimidine/phthalazinone-series inhibitors), MW 266–497, all RDKit-valid.
-  2W9S is a **non-cognate** holo receptor for these — their `holo_rigid` ceiling is
-  approximate, and this is reported as a limitation, not glossed over.
+- **Power set:** 10 ligands (`Cmpd-S01`–`Cmpd-S10`), known ricin A-chain inhibitors drawn from
+  other ricin A-chain co-crystal structures in the PDB (pteridine-7-carboxamide and
+  pyrimidinone-based active-site binders, plus one thiophene-carboxylic-acid scaffold for
+  diversity), MW 207–411, all RDKit-valid. 1BR6 is a **non-cognate** holo receptor for these
+  (each was solved with its own inhibitor bound, not pteroic acid) — their `holo_rigid`
+  ceiling is approximate, and this is reported as a limitation, not glossed over.
 
 11 ligands total, fixed before any docking.
 

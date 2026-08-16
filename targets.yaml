@@ -1,27 +1,40 @@
 pilot_target:
-  name: DHFR
-  organism: Staphylococcus aureus
+  name: "Ricin A chain"
+  organism: Ricinus communis
   apo:
-    pdb_id: 2W9T
+    pdb_id: 1RTC
     chain: A
     ligand_present: false
     cofactor_present: false
-    note: "Only crystallographic waters (136 HOH). No NADPH, no inhibitor."
+    note: "Only crystallographic waters. No ligand, no cofactor. Full 268/268 residues modeled, no gaps."
   holo:
-    pdb_id: 2W9S
+    pdb_id: 1BR6
     chain: A
-    ligand_code: TOP
-    ligand_name: TRIMETHOPRIM
-    ligand_smiles: "COc1cc(cc(c1OC)OC)Cc2cnc(nc2N)N"
-    ligand_mw: 290.318
-    cofactor_present: true
-    cofactor_code: NDP
-    cofactor_name: "NADPH DIHYDRO-NICOTINAMIDE-ADENINE-DINUCLEOTIDE PHOSPHATE"
-    other_heteroatoms: [GOL]  # glycerol, cryoprotectant, ignored
-  sequence_identity: "Identical 161-residue construct in both entries (verified via RCSB polymer_entity), same organism, no mutations."
-  confound: >
-    2W9S (holo) contains NADPH (NDP) in addition to trimethoprim; 2W9T (apo) contains
-    neither. Any apo->holo pocket rearrangement may be driven partly or wholly by cofactor
-    binding rather than solely by inhibitor binding. This confound is retained rather than
-    resolved by re-selecting a target, per PREREGISTRATION.md, and is reported alongside
-    every apo/holo geometry and docking result.
+    ligand_code: PT1
+    ligand_name: "PTEROIC ACID"
+    ligand_smiles: "c1cc(ccc1C(=O)O)NCc2cnc3c(n2)c(nc(n3)N)O"
+    ligand_mw: 312.283
+    cofactor_present: false
+    other_heteroatoms: []
+  sequence_identity: "Identical 268-residue construct in both entries (verified via RCSB polymer_entity), same organism, no mutations, no gaps in either model."
+  mechanism: >
+    Tyr80 sidechain swings out of the way to open the active site on inhibitor binding.
+    Documented in the CryptoSite cryptic-pocket benchmark, so this pair is a published
+    benchmark pick rather than one selected post hoc for a favorable outcome.
+
+target_swap_history:
+  - previous: "DHFR, apo 2W9T / holo 2W9S"
+    reason: >
+      2W9S carries NADPH in addition to the trimethoprim inhibitor; 2W9T carries neither.
+      The DHFR loop motion (Met20 loop) that PocketMiner flags for this pair closes over
+      NADPH's nicotinamide ring and is cofactor-driven, not inhibitor-driven. An
+      apo-conditioned sampler that never sees the cofactor could not reach that
+      conformation regardless of whether the underlying generative method works, which
+      makes a null result on this pair uninterpretable: it cannot distinguish "the sampler
+      mode-collapses" (H2, the interesting finding) from "the target conformation requires
+      a molecule the pipeline never modeled" (trivially true, uninformative). Documenting
+      this as a confound was not sufficient because it supplies an alternative explanation
+      for the pilot's primary finding, not just added noise -- a stricter standard than the
+      "note it or pick a matched pair" language in the original Phase 1a instructions
+      allowed for. Replaced with ricin A chain (1RTC/1BR6), which has no cofactor in either
+      structure, so the only difference between apo and holo is the inhibitor.
