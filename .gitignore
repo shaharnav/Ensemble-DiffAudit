@@ -50,4 +50,5 @@ bin/
 # Pipeline Outputs & Archives
 results.json
 results.csv
+rigid_control.csv
 /archive/

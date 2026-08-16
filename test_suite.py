@@ -6,6 +6,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from fetcher import fetch_alphafold_structure
 from docking_engine import run_docking
 from ensemble_auditor import aggregate_candidate_affinities
+from rigid_control import summarize_rigid_scores
 
 logging.basicConfig(level=logging.INFO)
 
@@ -25,6 +26,18 @@ assert metrics["delta_ensemble_vs_crystal"] < 0, (
     f"{metrics['delta_ensemble_vs_crystal']}"
 )
 print(f"Success: delta_ensemble_vs_crystal = {metrics['delta_ensemble_vs_crystal']:.3f} (negative, as expected)")
+
+# Test: if the rigid-control seeds land exactly on the ensemble's own conformer scores
+# (i.e. zero real conformational change), noise_corrected_delta should be ~0.
+print("--- TESTING summarize_rigid_scores (zero conformational change -> zero delta) ---")
+conformer_scores = [-6.247, -6.135, -6.173, -5.954, -6.238, -6.156]
+ensemble_best_affinity = min(conformer_scores)
+rigid_summary = summarize_rigid_scores(conformer_scores, ensemble_best_affinity)
+assert abs(rigid_summary["noise_corrected_delta"]) < 1e-9, (
+    f"Expected noise_corrected_delta ~0 when rigid scores == conformer scores, "
+    f"got {rigid_summary['noise_corrected_delta']}"
+)
+print(f"Success: noise_corrected_delta = {rigid_summary['noise_corrected_delta']:.6f} (~0, as expected)")
 
 # Test Metal Priority with P00918 (Carbonic Anhydrase)
 print("--- TESTING P00918 ---")
