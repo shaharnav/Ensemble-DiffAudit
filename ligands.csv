@@ -1,0 +1,12 @@
+ligand_id,tier,source_pdb,ligand_code,name,smiles,mw
+Cmpd-P01,primary,2W9S,TOP,Trimethoprim,"COc1cc(cc(c1OC)OC)Cc2cnc(nc2N)N",290.318
+Cmpd-S01,power,1KLK,MTX,Methotrexate,"CN(Cc1cnc2c(n1)c(nc(n2)N)N)c3ccc(cc3)C(=O)N[C@@H](CCC(=O)O)C(=O)O",454.439
+Cmpd-S02,power,4QJZ,TMQ,Trimetrexate,"Cc1c(ccc2c1c(nc(n2)N)N)CNc3cc(c(c(c3)OC)OC)OC",370.426
+Cmpd-S03,power,3KFY,BDM,"Brodimoprim-4,6-dicarboxylate","COc1cc(cc(c1Br)OCCC[C@@H](CCC(=O)[O-])C(=O)[O-])Cc2c[nH+]c(nc2N)N",496.332
+Cmpd-S04,power,1KLK,PMD,"[N-(2,4-Diaminopteridin-6-yl)-methyl]-dibenz[b,f]azepine","c1ccc2c(c1)C=Cc3ccccc3N2Cc4cnc5c(n4)c(nc(n5)N)N",367.407
+Cmpd-S05,power,3KFY,JZM,"5-[(4-chlorophenyl)sulfanyl]quinazoline-2,4-diamine","c1cc2c(c(c1)Sc3ccc(cc3)Cl)c(nc(n2)N)N",302.782
+Cmpd-S06,power,4IXG,IXG,"N6-methyl-N6-phenylpyrido[2,3-d]pyrimidine-2,4,6-triamine","CN(c1ccccc1)c2cc3c(nc(nc3nc2)N)N",266.301
+Cmpd-S07,power,4IXE,IXE,"N6-methyl-N6-(3,4,5-trifluorophenyl)pyrido[2,3-d]pyrimidine-2,4,6-triamine","CN(c1cc(c(c(c1)F)F)F)c2cc3c(nc(nc3nc2)N)N",320.273
+Cmpd-S08,power,3M08,RAR,"5-(3,4-dimethoxy-5-{3-oxo-3-[1-propylphthalazin-2(1H)-yl]prop-1-en-1-yl}benzyl)pyrimidine-2,4-diamine","CCC[C@H]1c2ccccc2C=NN1C(=O)/C=C/c3cc(cc(c3OC)OC)Cc4cnc(nc4N)N",486.566
+Cmpd-S09,power,7K6A,VYG,"6-ethyl-5-[3-({3-[4-(trifluoromethyl)piperidin-1-yl]pyridin-2-yl}oxy)propoxy]pyrimidine-2,4-diamine","CCc1c(c(nc(n1)N)N)OCCCOc2c(cccn2)N3CCC(CC3)C(F)(F)F",440.463
+Cmpd-S10,power,7K69,VY7,"1-{2-[2-(2,4-diamino-5,7-dihydro-6H-pyrrolo[3,4-d]pyrimidin-6-yl)-2-oxoethoxy]phenyl}piperidine-4-carboxylic acid","c1ccc(c(c1)N2CCC(CC2)C(=O)O)OCC(=O)N3Cc4c(nc(nc4N)N)C3",412.442

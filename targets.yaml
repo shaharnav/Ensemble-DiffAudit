@@ -1,0 +1,27 @@
+pilot_target:
+  name: DHFR
+  organism: Staphylococcus aureus
+  apo:
+    pdb_id: 2W9T
+    chain: A
+    ligand_present: false
+    cofactor_present: false
+    note: "Only crystallographic waters (136 HOH). No NADPH, no inhibitor."
+  holo:
+    pdb_id: 2W9S
+    chain: A
+    ligand_code: TOP
+    ligand_name: TRIMETHOPRIM
+    ligand_smiles: "COc1cc(cc(c1OC)OC)Cc2cnc(nc2N)N"
+    ligand_mw: 290.318
+    cofactor_present: true
+    cofactor_code: NDP
+    cofactor_name: "NADPH DIHYDRO-NICOTINAMIDE-ADENINE-DINUCLEOTIDE PHOSPHATE"
+    other_heteroatoms: [GOL]  # glycerol, cryoprotectant, ignored
+  sequence_identity: "Identical 161-residue construct in both entries (verified via RCSB polymer_entity), same organism, no mutations."
+  confound: >
+    2W9S (holo) contains NADPH (NDP) in addition to trimethoprim; 2W9T (apo) contains
+    neither. Any apo->holo pocket rearrangement may be driven partly or wholly by cofactor
+    binding rather than solely by inhibitor binding. This confound is retained rather than
+    resolved by re-selecting a target, per PREREGISTRATION.md, and is reported alongside
+    every apo/holo geometry and docking result.
