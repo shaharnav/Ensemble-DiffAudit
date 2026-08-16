@@ -7,6 +7,8 @@ from fetcher import fetch_alphafold_structure
 from docking_engine import run_docking
 from ensemble_auditor import aggregate_candidate_affinities
 from rigid_control import summarize_rigid_scores
+from chem_metrics import structural_alerts
+from rdkit import Chem
 
 logging.basicConfig(level=logging.INFO)
 
@@ -38,6 +40,22 @@ assert abs(rigid_summary["noise_corrected_delta"]) < 1e-9, (
     f"got {rigid_summary['noise_corrected_delta']}"
 )
 print(f"Success: noise_corrected_delta = {rigid_summary['noise_corrected_delta']:.6f} (~0, as expected)")
+
+# Regression fixtures: known structural-alert matches from the current N=7 candidate set.
+print("--- TESTING structural_alerts (known fixtures) ---")
+known_fixtures = {
+    "Cmpd-0006": ("CC[C@H]1SCC[C@H](F)C(=O)SC(C)(C)CC=C=C1[C@H](O)CCO", {"allene"}),
+    "Cmpd-0000": ("O=CN1C(=O)[C@H](CP(=O)(O)O)S[C@H]1CCC[C@H](C[C@H]1CC=CO1)[C@H]1CO1", {"epoxide", "phosphonic_acid"}),
+    "Cmpd-0003": ("C[C@@H](F)[C@@H](F)[C@@H]1O[C@@H]([C@@H]2C[C@H](C)[C@@H]3O[C@@H]3[C@@H]2S)C(F)(F)OC[C@]1(C)O", {"epoxide", "free_thiol"}),
+    "Cmpd-0007": ("Cc1nc(N)sc1C[C@H](C)CNC(=O)[C@H]1C=CC=CC1=O", {"michael_acceptor"}),
+    "Cmpd-0008": ("C[C@H](O)[C@]1(C(=O)O)CC2=C(C[C@H](Cl)CC2)[C@@H]1N", {"alkyl_halide"}),
+}
+for cmpd_id, (smiles, expected_alerts) in known_fixtures.items():
+    mol = Chem.MolFromSmiles(smiles)
+    assert mol is not None, f"{cmpd_id}: failed to parse SMILES"
+    found = set(structural_alerts(mol))
+    assert found == expected_alerts, f"{cmpd_id}: expected {expected_alerts}, got {found}"
+print(f"Success: all {len(known_fixtures)} known structural-alert fixtures matched")
 
 # Test Metal Priority with P00918 (Carbonic Anhydrase)
 print("--- TESTING P00918 ---")

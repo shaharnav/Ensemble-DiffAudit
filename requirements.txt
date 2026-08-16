@@ -12,9 +12,12 @@ Jinja2==3.1.6
 MarkupSafe==3.0.3
 meeko==0.7.1
 numpy==2.4.4
+pandas==3.0.5
 pillow==12.1.1
+posebusters==0.6.5
 rdkit==2025.9.6
 requests==2.33.1
 scipy==1.17.1
+statsmodels==0.14.6
 urllib3==2.6.3
 Werkzeug==3.1.7
