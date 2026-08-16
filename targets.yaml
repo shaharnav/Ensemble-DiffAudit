@@ -1,40 +1,78 @@
 pilot_target:
-  name: "Ricin A chain"
-  organism: Ricinus communis
+  name: "Cellular retinol-binding protein 1 (CRBP1)"
+  organism: Homo sapiens
   apo:
-    pdb_id: 1RTC
+    pdb_id: 5H9A
     chain: A
     ligand_present: false
     cofactor_present: false
-    note: "Only crystallographic waters. No ligand, no cofactor. Full 268/268 residues modeled, no gaps."
+    note: >
+      Only heteroatom is BTB (Bis-Tris buffer, a crystallization additive, not a
+      cofactor). 139/140 residues modeled, no gaps.
   holo:
-    pdb_id: 1BR6
+    pdb_id: 6E5L
     chain: A
-    ligand_code: PT1
-    ligand_name: "PTEROIC ACID"
-    ligand_smiles: "c1cc(ccc1C(=O)O)NCc2cnc3c(n2)c(nc(n3)N)O"
-    ligand_mw: 312.283
+    ligand_code: HVD
+    ligand_name: "(1'R,2'R)-5'-methyl-6-pentyl-2'-(prop-1-en-2-yl)-1',2',3',4'-tetrahydro[1,1'-biphenyl]-2,4-diol (abnormal-cannabidiol, abn-CBD)"
+    ligand_smiles: "CCCCCc1cc(cc(c1C2C=C(CCC2C(=C)C)C)O)O"
+    ligand_mw: 314.462
     cofactor_present: false
     other_heteroatoms: []
-  sequence_identity: "Identical 268-residue construct in both entries (verified via RCSB polymer_entity), same organism, no mutations, no gaps in either model."
+    note: "140/140 residues modeled, no gaps."
+  sequence_identity: "Identical 140-residue construct in both entries (verified via RCSB polymer_entity), same organism, no mutations, no gaps in either model."
   mechanism: >
-    Tyr80 sidechain swings out of the way to open the active site on inhibitor binding.
-    Documented in the CryptoSite cryptic-pocket benchmark, so this pair is a published
-    benchmark pick rather than one selected post hoc for a favorable outcome.
+    Portal-loop opening: the beta-barrel entryway loop around residues 76-77 swings open
+    on ligand binding (max single-residue CA displacement 6.22 A at holo residue 76;
+    every other pocket-lining residue moves < 1.1 A except residue 77 at 2.04 A) --
+    a localized backbone motion, not a global rearrangement (global CA RMSD 1.15 A vs.
+    pocket CA RMSD 1.57 A). CA-to-allatom pocket RMSD ratio 0.947, the highest of any
+    qualifying pair in the screen -- strongly backbone-driven, well-suited to a
+    backbone-sampling method like ConforMix/Boltz.
+  selection_method: >
+    Selected by target_screen.py (Phase 1b) as the top-ranked qualifying pair (highest
+    CA-to-allatom ratio inside the 1.0-2.5 A pocket CA RMSD band, no cofactor
+    difference) out of 43 PocketMiner apo/holo pairs. See target_screen.csv for the full
+    screen output and PREREGISTRATION.md for the fixed screening criteria.
 
 target_swap_history:
-  - previous: "DHFR, apo 2W9T / holo 2W9S"
+  - candidate: "DHFR, apo 2W9T / holo 2W9S"
+    outcome: rejected before any run
     reason: >
       2W9S carries NADPH in addition to the trimethoprim inhibitor; 2W9T carries neither.
       The DHFR loop motion (Met20 loop) that PocketMiner flags for this pair closes over
       NADPH's nicotinamide ring and is cofactor-driven, not inhibitor-driven. An
       apo-conditioned sampler that never sees the cofactor could not reach that
       conformation regardless of whether the underlying generative method works, which
-      makes a null result on this pair uninterpretable: it cannot distinguish "the sampler
-      mode-collapses" (H2, the interesting finding) from "the target conformation requires
-      a molecule the pipeline never modeled" (trivially true, uninformative). Documenting
-      this as a confound was not sufficient because it supplies an alternative explanation
-      for the pilot's primary finding, not just added noise -- a stricter standard than the
-      "note it or pick a matched pair" language in the original Phase 1a instructions
-      allowed for. Replaced with ricin A chain (1RTC/1BR6), which has no cofactor in either
-      structure, so the only difference between apo and holo is the inhibitor.
+      makes a null result on this pair uninterpretable. Documenting this as a confound
+      was not sufficient because it supplies an alternative explanation for the pilot's
+      primary finding, not just added noise. Separately confirmed by target_screen.py:
+      pocket CA RMSD 2.64 A (via the original single-pair script) exceeds the 2.0 A
+      ConforMix sampling shell, so the holo state may have been out of reach by
+      construction as well.
+  - candidate: "Ricin A chain, apo 1RTC / holo 1BR6"
+    outcome: rejected before any run
+    reason: >
+      Cofactor-free and otherwise clean (same 268-residue construct, no mutations, no
+      gaps), but the mechanism is a Tyr80 sidechain swing: pocket CA RMSD 0.38 A against
+      all-atom 1.05 A (ratio 0.36). ConforMix/Boltz sampling is backbone-driven, so a
+      null result would be ambiguous between H2 (mode collapse) and "wrong tool for this
+      motion type" -- indistinguishable, same defect class as the DHFR rejection, just
+      via a different mechanism (sampler/motion-type mismatch instead of an unmodeled
+      cofactor).
+  - candidate: "LpqN, apo 6E5D / holo 6E5F (suggested backup, never formally proposed as primary)"
+    outcome: excluded by the Phase 1b screen
+    reason: >
+      Checked automatically as part of the 43-pair screen rather than hand-verified:
+      pocket CA RMSD 0.56 A (below the 1.0 A floor -- displacement barely clears
+      trypsin's ~0.2 A noise level) and CA-to-allatom ratio 0.49 (sidechain-gated, the
+      same failure mode as ricin). Would have needed the same rejection as ricin had it
+      been checked by hand; the systematic screen caught it without that step.
+  - candidate: "CRBP1, apo 5H9A / holo 6E5L"
+    outcome: selected
+    reason: >
+      Top-ranked qualifying pair from the Phase 1b screen: pocket CA RMSD 1.57 A (inside
+      the 1.0-2.5 A band), CA-to-allatom ratio 0.947 (the highest of any qualifying
+      pair -- strongly backbone-driven), no cofactor difference (apo's only heteroatom is
+      a crystallization buffer component, not a cofactor), drug-like holo ligand (abn-CBD,
+      MW 314.5), small tractable single-chain construct (140 residues). Manually verified
+      against RCSB per Phase 1a criteria before finalizing.
