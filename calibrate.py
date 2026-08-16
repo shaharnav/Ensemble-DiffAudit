@@ -15,6 +15,7 @@ import logging
 import os
 import statistics
 import sys
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import numpy as np
 from Bio.PDB import PDBParser, PDBIO, Select
@@ -22,7 +23,7 @@ from meeko import PDBQTMolecule, RDKitMolCreate
 from rdkit import Chem
 from rdkit.Chem import AllChem, rdMolAlign
 
-from docking_engine import run_docking
+from docking_engine import run_docking, compute_parallel_plan
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -144,7 +145,13 @@ def main() -> int:
     rmsd_per_seed: dict[int, float] = {}
     score_per_seed: dict[int, float] = {}
 
-    for seed in SEEDS:
+    # compute_parallel_plan derives worker count and per-job Vina --cpu from the machine
+    # this runs on (os.cpu_count()), so it adapts automatically on a smaller/larger box.
+    num_workers, vina_cpu = compute_parallel_plan()
+    logger.info(f"Redocking {len(SEEDS)} seeds with {num_workers} parallel worker(s), "
+                f"{vina_cpu} Vina CPU(s) each.")
+
+    def _run_one(seed):
         job_name = f"calibration_benzamidine_seed{seed}"
         result = run_docking(
             pdb_file=STRIPPED_RECEPTOR,
@@ -155,19 +162,25 @@ def main() -> int:
             center_coords=center.tolist(),
             box_size=BOX_SIZE,
             seed=seed,
+            vina_cpu=vina_cpu,
         )
-
         if result is None or result.get("affinity") is None:
-            logger.error(f"Docking failed for seed {seed}.")
-            continue
-
+            return seed, None, None
         affinity = result["affinity"]
         docked_pdbqt = os.path.join(WORK_DIR, f"{job_name}_out.pdbqt")
         rmsd = redock_top_pose_rmsd(docked_pdbqt, reference_mol)
+        return seed, affinity, rmsd
 
-        rmsd_per_seed[seed] = rmsd
-        score_per_seed[seed] = affinity
-        logger.info(f"  seed={seed}: affinity={affinity:.3f} kcal/mol, top-pose RMSD={rmsd:.3f} A")
+    with ThreadPoolExecutor(max_workers=num_workers) as executor:
+        futures = [executor.submit(_run_one, seed) for seed in SEEDS]
+        for future in as_completed(futures):
+            seed, affinity, rmsd = future.result()
+            if affinity is None:
+                logger.error(f"Docking failed for seed {seed}.")
+                continue
+            rmsd_per_seed[seed] = rmsd
+            score_per_seed[seed] = affinity
+            logger.info(f"  seed={seed}: affinity={affinity:.3f} kcal/mol, top-pose RMSD={rmsd:.3f} A")
 
     if not rmsd_per_seed:
         logger.error("All redocking runs failed -- cannot calibrate.")

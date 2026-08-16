@@ -56,3 +56,9 @@ conformer_geometry.csv
 attrition.json
 performance.json
 /archive/
+
+# Experiment 2 pilot outputs
+apo_holo_geometry.csv
+experiment2_conformer_geometry.csv
+cross_docking.csv
+/results/experiment2/
