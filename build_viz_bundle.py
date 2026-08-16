@@ -43,15 +43,19 @@ DOCK_OUTPUT_DIR = os.path.join(UNPACKED, "traj_docking")
 POCKET_LINING_RADIUS = 8.0  # Angstrom, for highlighting pocket-lining residues in the viewer
 
 # Geometry-verified mapping: SDF <OriginalIndex> -> trajectory filename.
-# Verified via ICP correspondence + Kabsch RMSD (see icp_correspondence below)
-# against every file in valid_trajectories/; true matches score ~0.0005 A, all
-# others fail on atom-count alone. The other 4 SDF candidates (of 7 valid) have
-# no matching trajectory (likely dropped during the notebook's RDKit
-# sanitize/fragment-pick step) and are excluded here.
+# Verified via ICP correspondence + Kabsch RMSD (see icp_correspondence below);
+# true matches score ~0.0005 A. mol_{idx:04d}.xyz doesn't always correspond to
+# OriginalIndex=idx -- generate_ligands.py's largest_frag fragment-picking can
+# change the atom count between the raw trajectory and the final filtered
+# candidate, so a name-based mapping alone isn't reliable (many indices in the
+# N=112 set have a trajectory/SDF atom-count mismatch for exactly this reason).
+# These are the top-3 by affinity among candidates where the atom counts do
+# match (i.e. a clean full-trajectory recording survives to the final
+# candidate).
 ORIGIDX_TO_TRAJ = {
-    3: "mol_0003.xyz",
-    4: "mol_0004.xyz",
-    6: "mol_0006.xyz",
+    15: "mol_0015.xyz",
+    94: "mol_0094.xyz",
+    198: "mol_0198.xyz",
 }
 
 
