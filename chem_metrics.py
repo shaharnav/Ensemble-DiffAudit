@@ -130,6 +130,10 @@ def annotate(df: pd.DataFrame) -> pd.DataFrame:
         n_alerts.append(len(alerts))
 
         winning_structure = row.get("overall_best_structure") or row.get("winning_conformation")
+        # A candidate with no successful docking job at all has an empty string here,
+        # which pandas reads back from CSV as NaN (float), not "".
+        if pd.isna(winning_structure):
+            winning_structure = None
         pdbqt_path = (
             _find_docked_pose_pdbqt(smiles, winning_structure, n) if winning_structure else None
         )
