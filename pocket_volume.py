@@ -4,8 +4,12 @@ Experiment 3, Phase 2: pocket characterization and the volume gate.
 No fpocket binary is available in this environment (checked: not on PATH, not in
 Homebrew), so this uses a grid-based proxy instead, per the plan's explicit fallback.
 
+Center is read from pocket_config.yaml (the ligand-transfer-based box, not a geometric cavity
+finder -- see pocket_config.py) rather than recomputed here, per the rule that every
+downstream stage reads center/box from that one file.
+
 Method: a fixed 3D grid (0.5 A spacing) inside a sphere of radius `POCKET_RADIUS` centered on
-the active-site centroid. `cavity_volume_A3` is the total non-clashing volume inside that
+pocket_config.yaml's center. `cavity_volume_A3` is the total non-clashing volume inside that
 sphere -- grid points farther than `CLASH_MIN` (a water-probe-radius cutoff) from every
 receptor heavy atom.
 
@@ -27,6 +31,7 @@ import os
 import sys
 
 import numpy as np
+import yaml
 from Bio.PDB import PDBParser
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -34,26 +39,20 @@ logger = logging.getLogger(__name__)
 
 R1_PATH = os.path.join("results", "experiment3", "receptors", "R1_zymogen.pdb")
 R2_PATH = os.path.join("results", "experiment3", "receptors", "R2_mature_proxy.pdb")
+POCKET_CONFIG_YAML = "pocket_config.yaml"
 CHAIN_ID = "A"
-CATALYTIC_TRIAD = {"cys": 78, "his": 237, "asn": 255}
 POCKET_RADIUS = 10.0  # sphere radius for the cavity-volume estimate
 GRID_SPACING = 0.5
-BOX_HALF_SIZE = 12.0  # -> 24 A cube docking box (see receptors.yaml), independent of POCKET_RADIUS
 CLASH_MIN = 1.4
 OUTPUT_JSON = os.path.join("results", "experiment3", "pocket_volume.json")
 
 
-def get_active_site_centroid(pdb_path: str) -> np.ndarray:
-    """Defined from R2 (the open state) per the plan -- R1's site is occluded and can't
-    define its own box."""
-    parser = PDBParser(QUIET=True)
-    structure = parser.get_structure("r", pdb_path)
-    chain = structure[0][CHAIN_ID]
-    res_by_id = {r.id[1]: r for r in chain if r.id[0] == " "}
-    sg = res_by_id[CATALYTIC_TRIAD["cys"]]["SG"].get_coord()
-    ne2 = res_by_id[CATALYTIC_TRIAD["his"]]["NE2"].get_coord()
-    od1 = res_by_id[CATALYTIC_TRIAD["asn"]]["OD1"].get_coord()
-    return np.mean([sg, ne2, od1], axis=0)
+def get_active_site_centroid() -> tuple[np.ndarray, list]:
+    """Reads center/box from pocket_config.yaml -- the ligand-transfer-based
+    determination, not a geometric cavity finder. Never recomputed here."""
+    with open(POCKET_CONFIG_YAML) as f:
+        config = yaml.safe_load(f)
+    return np.array(config["center"]), config["box_size_A"]
 
 
 def compute_cavity_volume(pdb_path: str, centroid: np.ndarray) -> dict:
@@ -96,15 +95,14 @@ def compute_cavity_volume(pdb_path: str, centroid: np.ndarray) -> dict:
 
 
 def main() -> int:
-    for path in (R1_PATH, R2_PATH):
+    for path in (R1_PATH, R2_PATH, POCKET_CONFIG_YAML):
         if not os.path.exists(path):
-            logger.error(f"{path} not found -- run exp3_receptor_prep.py first.")
+            logger.error(f"{path} not found -- run exp3_receptor_prep.py / pocket_config.py first.")
             return 1
 
-    centroid = get_active_site_centroid(R2_PATH)
-    logger.info(f"Active-site centroid (from R2 catalytic triad): {centroid}")
-    logger.info(f"Docking box: center {centroid.tolist()}, "
-                f"size {[BOX_HALF_SIZE * 2] * 3} A")
+    centroid, box_size = get_active_site_centroid()
+    logger.info(f"Active-site centroid (from pocket_config.yaml): {centroid}")
+    logger.info(f"Docking box: center {centroid.tolist()}, size {box_size} A")
 
     results = {}
     for label, path in (("R1_zymogen", R1_PATH), ("R2_mature_proxy", R2_PATH)):
@@ -130,7 +128,8 @@ def main() -> int:
 
     output = {
         "box_center": centroid.tolist(),
-        "box_size_A": [BOX_HALF_SIZE * 2] * 3,
+        "box_size_A": box_size,
+        "box_source": POCKET_CONFIG_YAML,
         "pocket_radius_A": POCKET_RADIUS,
         "grid_spacing_A": GRID_SPACING,
         "clash_min_A": CLASH_MIN,

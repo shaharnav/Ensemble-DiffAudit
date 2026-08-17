@@ -90,6 +90,14 @@ docking_box:
 pocket_volume:
   script: pocket_volume.py
   output: results/experiment3/pocket_volume.json
+  center_source: pocket_config.yaml
+  note: >
+    Recomputed after pocket_config.py replaced the box definition (ligand transfer from
+    papain-family holo structures, not geometric cavity detection). Center moved from the
+    catalytic-triad centroid (used below, superseded) to pocket_config.yaml's
+    ligand-transfer centroid -- the sphere now sits over the actual substrate groove
+    rather than just the dyad, which is why both volumes and the opening are larger than
+    the superseded numbers.
   method: >
     Grid-based proxy (fpocket not available in this environment: not on PATH, not in
     Homebrew). 0.5 A grid spacing, 10 A sphere around the active-site centroid,
@@ -97,8 +105,12 @@ pocket_volume:
     atom) within that sphere. This is coarser than true SASA-based cavity detection (no
     flood-fill enclosure test) -- used only for relative R1/R2/conformer comparison under
     the identical sphere, not as an absolute physical cavity volume.
-  R1_zymogen_A3: 2454.2
-  R2_mature_proxy_A3: 2744.5
-  opening_A3: 290.3
+  R1_zymogen_A3: 2678.0
+  R2_mature_proxy_A3: 3243.4
+  opening_A3: 565.4
   gate_threshold_A3: 150
   gate_result: "PASS (both R1 and R2 well above threshold)"
+  superseded_numbers_triad_centered:
+    R1_zymogen_A3: 2454.2
+    R2_mature_proxy_A3: 2744.5
+    opening_A3: 290.3
