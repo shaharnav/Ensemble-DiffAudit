@@ -72,11 +72,20 @@ receptors:
       assumption.
 
 docking_box:
-  script: pocket_volume.py
-  center: [57.345333099365234, 23.142000198364258, -23.40033531188965]
-  size_A: [24.0, 24.0, 24.0]
-  defined_from: "R2 catalytic-triad centroid (Cys78 SG, His237 NE2, Asn255 OD1) -- R1's site is occluded and can't define its own box, per the plan."
-  note: "Fixed and applied unchanged to every receptor in every condition (R1, R2, C0-C5)."
+  superseded_by: pocket_config.yaml
+  note: >
+    The cavity-detection-based box below (pocket_volume.py, centered on the catalytic-triad
+    centroid) was superseded: Xylellain's site is occluded even in R2, so a geometric
+    approach risked finding a surface depression rather than the true substrate groove.
+    Replaced with ligand transfer from papain-family holo structures (pocket_config.py) --
+    see pocket_config.yaml for the authoritative center/box, alignment diagnostics, and
+    validation. Every downstream stage (Vina docking, DiffSBDD pocket conditioning) reads
+    from pocket_config.yaml, never recomputes it.
+  previous_geometric_box:
+    script: pocket_volume.py
+    center: [57.345333099365234, 23.142000198364258, -23.40033531188965]
+    size_A: [24.0, 24.0, 24.0]
+    defined_from: "R2 catalytic-triad centroid (Cys78 SG, His237 NE2, Asn255 OD1)."
 
 pocket_volume:
   script: pocket_volume.py

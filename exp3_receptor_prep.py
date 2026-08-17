@@ -44,13 +44,26 @@ R2_PATH = os.path.join(OUT_DIR, "R2_mature_proxy.pdb")
 
 
 class ChainAProteinOnly(Select):
-    """Chain A, standard residues only -- drops waters, UDP, and the other 3 crystallographic copies."""
+    """Chain A, standard residues only -- drops waters, UDP, and the other 3 crystallographic
+    copies. Also resolves alternate conformations: PDBIO.get_unpacked_list() writes every
+    altloc variant regardless of disordered_select(), so this filters at the atom level too
+    -- keep altloc ' ' or 'A' (in every disordered residue in 3OIS, 'A' is occupancy-highest
+    or tied, matching _resolve_altlocs's tiebreak)."""
 
     def accept_residue(self, residue):
         return residue.get_parent().id == CHAIN_ID and residue.id[0] == " "
 
     def accept_chain(self, chain):
         return chain.id == CHAIN_ID
+
+    def accept_atom(self, atom):
+        if atom.get_altloc() not in (" ", "A"):
+            return False
+        # A single retained conformation should carry no altloc marker at all -- otherwise
+        # mk_prepare_receptor still sees a (now-orphaned) 'A' code and refuses to run.
+        atom.set_altloc(" ")
+        atom.set_occupancy(1.0)
+        return True
 
 
 class ChainAMatureOnly(ChainAProteinOnly):
@@ -62,6 +75,20 @@ class ChainAMatureOnly(ChainAProteinOnly):
         return not (PROPEPTIDE_RANGE[0] <= residue.id[1] <= PROPEPTIDE_RANGE[1])
 
 
+def _resolve_altlocs(structure) -> None:
+    """3OIS has several residues with alternate conformations (equal 0.5/0.5 occupancy in
+    every case observed). mk_prepare_receptor.py refuses to run on a structure with
+    unresolved altlocs, so pick one deterministically -- highest occupancy, ties broken
+    alphabetically (i.e. 'A') -- for every disordered atom before writing R1/R2."""
+    for atom in structure.get_atoms():
+        if atom.is_disordered():
+            best_altloc = max(
+                atom.disordered_get_id_list(),
+                key=lambda altloc: (atom.disordered_get(altloc).get_occupancy(), -ord(altloc)),
+            )
+            atom.disordered_select(best_altloc)
+
+
 def main() -> int:
     if not os.path.exists(SOURCE_PDB):
         logger.error(f"{SOURCE_PDB} not found. Fetch via "
@@ -71,6 +98,7 @@ def main() -> int:
     os.makedirs(OUT_DIR, exist_ok=True)
     parser = PDBParser(QUIET=True)
     structure = parser.get_structure("3ois", SOURCE_PDB)
+    _resolve_altlocs(structure)
 
     io = PDBIO()
     io.set_structure(structure)
