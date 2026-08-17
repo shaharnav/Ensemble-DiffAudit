@@ -62,3 +62,6 @@ apo_holo_geometry.csv
 experiment2_conformer_geometry.csv
 cross_docking.csv
 /results/experiment2/
+
+# Experiment 3 (Xylellain) outputs
+/results/experiment3/
