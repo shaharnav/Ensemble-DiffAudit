@@ -1,0 +1,12 @@
+id,smiles,ic50_uM,pIC50,zbg_class,mw,heavy_atoms,source
+Engel_3,Cc1ccc(NC(=O)C(S)Cc2ccccc2)cc1,0.48,6.3188,thiol,271.1,19,PMC9112332
+Engel_5,O=C(Nc1ccccc1)C(S)Cc1ccccc1,1.2,5.9208,thiol,257.09,18,PMC9112332
+Engel_11,O=C(Nc1ccc([N+](=O)[O-])cc1)C(S)Cc1ccccc1,1.0,6.0,thiol,302.07,21,PMC9112332
+Engel_12,COc1ccc(NC(=O)C(S)Cc2ccccc2)cc1,0.7,6.1549,thiol,287.1,20,PMC9112332
+Engel_13,O=C(Nc1ccc(O)cc1)C(S)Cc1ccccc1,0.6,6.2218,thiol,273.08,19,PMC9112332
+Engel_15,O=C(Nc1ccc(O)cc1)C(S)Cc1ccc(O)cc1,7.4,5.1308,thiol,289.08,20,PMC9112332
+Engel_16,O=C(Nc1ccc(O)c([N+](=O)[O-])c1)C(S)Cc1ccccc1,2.5,5.6021,thiol,318.07,22,PMC9112332
+Engel_17,O=C(Nc1ccc(Cl)cc1)C(S)Cc1ccccc1,1.1,5.9586,thiol,291.05,19,PMC9112332
+Engel_19,COC(=O)c1sccc1NC(=O)C(S)Cc1ccccc1,0.24,6.6198,thiol,321.05,21,PMC9112332
+Engel_23,O=C(Nc1nc2ccccc2s1)C(S)Cc1ccccc1,0.6,6.2218,thiol,314.05,21,PMC9112332
+Phosphoramidon,CC(C)C[C@H](NP(=O)(O)O[C@@H]1O[C@@H](C)[C@H](O)[C@@H](O)[C@H]1O)C(=O)N[C@@H](Cc1c[nH]c2ccccc12)C(=O)O,0.25,6.6021,phosphoramidate,543.2,37,PMC9404851/Morihara1978
