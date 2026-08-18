@@ -114,3 +114,64 @@ and this document would have reported a methodology negative: ConforMix does not
 steer toward holo geometry for loop-dominated motions, regardless of MSA quality.
 GluR demonstrates that case. LasB demonstrates the positive case. Both are reported without
 hedging; neither result is selected after the fact.
+
+---
+
+## Phase 4 — Ensemble cross-docking results (LasB)
+
+**Date:** 2026-08-17
+**Run:** `ensemble_auditor.py --payload ensemble_payload_lasb_v2.zip --exhaustiveness 16`
+**Matrix:** 20 DiffSBDD candidates × 7 receptors (6 aligned conformers + 1EZM crystal baseline) = 140 jobs
+**Failures:** 0/140
+
+All 6 conformer PDBs were globally aligned to the 1EZM crystal frame via BioPython Superimposer
+(RMSDs 0.990–1.341 Å) before docking, ensuring Vina's search box (center 55.521, 35.882, 20.807;
+24 Å sides) covers the correct pocket for every receptor. The 1EZM crystal baseline is included
+in the ensemble as a rigid-receptor reference.
+
+### Full ranking table
+
+| Rank | Best (kcal/mol) | Crystal (kcal/mol) | Delta | H-bonds | Winning conformer |
+|------|----------------|--------------------|-------|---------|-------------------|
+| 1  | −7.99 | −6.20 | +1.79 | 0 | β0.8  |
+| 2  | −7.44 | −6.01 | +1.42 | 1 | β0.8  |
+| 3  | −7.37 | −5.63 | +1.74 | 6 | β3.2  |
+| 4  | −7.30 | −5.60 | +1.70 | 4 | β3.2  |
+| 5  | −7.09 | −6.00 | +1.10 | 4 | β0.0  |
+| 6  | −7.09 | −5.72 | +1.36 | 3 | β0.0  |
+| 7  | −6.96 | −6.68 | +0.29 | 0 | β0.8  |
+| 8  | −6.91 | −4.72 | +2.19 | 1 | β2.4  |
+| 9  | −6.88 | −5.16 | +1.72 | 1 | β2.4  |
+| 10 | −6.66 | −4.75 | +1.91 | 3 | β3.2  |
+| 11 | −6.62 | −5.41 | +1.21 | 1 | β0.0  |
+| 12 | −6.60 | −5.15 | +1.45 | 1 | β0.0  |
+| 13 | −6.47 | −5.11 | +1.37 | 1 | β0.8  |
+| 14 | −6.20 | −4.58 | +1.61 | 1 | β0.8  |
+| 15 | −6.09 | −5.29 | +0.79 | 3 | β2.4  |
+| 16 | −6.00 | −4.37 | +1.64 | 3 | β2.4  |
+| 17 | −5.90 | −4.71 | +1.19 | 2 | β0.0  |
+| 18 | −5.85 | −4.12 | +1.73 | 4 | β0.8  |
+| 19 | −5.75 | −4.55 | +1.20 | 1 | β3.2  |
+| 20 | −5.45 | −4.51 | +0.94 | 0 | β0.0  |
+
+Delta = ensemble best − crystal baseline (positive = conformer advantage over rigid receptor).
+
+### Interpretation
+
+**20/20 candidates score better in a holo-like conformer than in the apo crystal receptor.**
+This is consistent with the Phase 2b H1 verdict: the conformers are biased toward the holo
+pocket geometry, and generated ligands exploit that geometry.
+
+Key observations:
+- Delta range: +0.29 to +2.19 kcal/mol. The smallest gain (candidate 7, +0.29) still favors
+  the ensemble; there are no candidates that prefer the rigid crystal.
+- Winning conformers are distributed across β0.0, β0.8, β2.4, and β3.2 — no single conformer
+  dominates. The ensemble is doing real discriminative work, not just uniformly shifting scores.
+- Candidate 3 has 6 H-bonds in β3.2, the highest in the set; worth prioritizing for further
+  analysis given that H-bond count is a proxy for specificity.
+- Largest ensemble advantage: candidate 8 (+2.19 kcal/mol in β2.4), suggesting the β2.4
+  conformer opens a sub-pocket not accessible in the apo crystal.
+- Top affinity: −7.99 kcal/mol (candidate 1, β0.8). For context, the RDF co-crystal ligand
+  redocks to 1EZM at ~−6.7 kcal/mol; the top candidates exceed that in holo-like conformers.
+
+Full results saved to `results/lasb_clean_results.json` and `results/lasb_clean_results.csv`.
