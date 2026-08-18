@@ -1,0 +1,7 @@
+conformer,mature_domain_anchor_rmsd_to_R1,n_anchor_residues,pocket_ca_rmsd_to_R1,pocket_allatom_rmsd_to_R1,pocket_ca_rmsd_to_R2,n_pocket_residues,propeptide_ca_rmsd_to_R1,occluding_loop_ca_rmsd_to_R1,cavity_volume_A3,cavity_opening_vs_R1_A3,cavity_pct_of_R1_to_R2_gap,com_surface_delta_A,plausibility_gate_passed,plausibility_gate_reasons
+conformix_var_0.pdb,1.626,224,110.858,110.182,110.858,15,126.72,114.683,,,,94.21,False,propeptide CA RMSD 126.7 A > 15.0 A; propeptide COM-to-surface distance increased by 94.2 A > 10.0 A vs. R1
+conformix_var_1.pdb,1.312,224,65.767,66.128,65.767,15,68.231,60.521,,,,39.23,False,propeptide CA RMSD 68.2 A > 15.0 A; propeptide COM-to-surface distance increased by 39.2 A > 10.0 A vs. R1
+conformix_var_2.pdb,1.537,224,102.918,102.853,102.918,15,125.034,98.752,,,,95.58,False,propeptide CA RMSD 125.0 A > 15.0 A; propeptide COM-to-surface distance increased by 95.6 A > 10.0 A vs. R1
+conformix_var_3.pdb,1.613,224,28.752,28.847,28.752,15,33.917,28.4,4167.1,1489.1,263.4,5.5,False,propeptide CA RMSD 33.9 A > 15.0 A; cavity volume 4167.1 A^3 exceeds R2's 3243.4 A^3
+conformix_var_4.pdb,1.468,224,87.264,87.221,87.264,15,105.284,85.634,,,,72.28,False,propeptide CA RMSD 105.3 A > 15.0 A; propeptide COM-to-surface distance increased by 72.3 A > 10.0 A vs. R1
+conformix_var_5.pdb,1.577,224,11.633,11.969,11.633,15,24.358,7.941,2328.8,-349.2,-61.8,-0.71,False,propeptide CA RMSD 24.4 A > 15.0 A

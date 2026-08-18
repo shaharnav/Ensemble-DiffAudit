@@ -1,0 +1,8 @@
+compound_id,name,smiles,pubchem_cid,role,source
+IMP,Inosine 5'-monophosphate,C1=NC(=O)C2=C(N1)N(C=N2)[C@H]3[C@@H]([C@@H]([C@H](O3)COP(=O)(O)O)O)O,8582,substrate,PubChem
+XMP,Xanthosine 5'-monophosphate,C1=NC2=C(N1[C@H]3[C@@H]([C@@H]([C@H](O3)COP(=O)(O)O)O)O)NC(=O)NC2=O,73323,product,PubChem
+MPA,Mycophenolic acid,CC1=C2COC(=O)C2=C(C(=C1OC)C/C=C(\C)/CCC(=O)O)O,446541,uncompetitive_inhibitor_NAD_site,PubChem
+RVP,Ribavirin 5'-monophosphate,C1=NC(=NN1[C@H]2[C@@H]([C@@H]([C@H](O2)COP(=O)(O)O)O)O)C(=O)N,None,active_metabolite_of_ribavirin,PubChem
+MERI,Merimepodib (VX-497),COC1=C(C=CC(=C1)NC(=O)NC2=CC=CC(=C2)CNC(=O)O[C@H]3CCOC3)C4=CN=CO4,None,NAD_site_inhibitor,PubChem
+CP7B,"Urea inhibitor 7b (Cryptosporidium/bacterial-type IMPDH-selective, EC50 6 nM, 670-fold selective)",CC(=NO)c1cccc(c1)C(C)(C)NC(=O)Nc1cc([N+](=O)[O-])c(Cl)cc1,None,pathogen_selective_urea_inhibitor,"Macpherson et al. PMC3635066"
+TIAZ,Tiazofurin,C1=C(N=C(S1)[C@H]2[C@@H]([C@@H]([C@H](O2)CO)O)O)C(=O)N,457954,prodrug_NAD_analog_inhibitor,PubChem
