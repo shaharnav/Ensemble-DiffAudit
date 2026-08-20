@@ -28,16 +28,6 @@ def native_ifp(holo_receptor_pdb, ligand_sdf):
     return fp.to_dataframe().iloc[0]
 
 
-def pose_ifp(receptor_pdbqt_or_pdb, pose_mol):
-    u = mda.Universe(receptor_pdbqt_or_pdb)
-    protein = u.select_atoms("protein")
-    lig_plf = plf.Molecule.from_rdkit(pose_mol)
-    prot_plf = plf.Molecule.from_mda(protein)
-    fp = plf.Fingerprint()
-    fp.run_from_iterable([lig_plf], prot_plf)
-    return fp.to_dataframe().iloc[0]
-
-
 def ifp_tanimoto(ref_series, pose_series):
     ref_keys = set(k for k, v in ref_series.items() if v)
     pose_keys = set(k for k, v in pose_series.items() if v)
