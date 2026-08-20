@@ -1,0 +1,16 @@
+pdbid,ligand,receptor_pdb,receptor_pdbqt,prep_ok
+1U4G,HPI,results/lasb_ensemble_rmsd/receptors_raw/1U4G_holo_receptor.pdb,results/lasb_ensemble_rmsd/receptors_raw/1U4G_holo_receptor.pdbqt,True
+3DBK,RDF,results/lasb_ensemble_rmsd/receptors_raw/3DBK_holo_receptor.pdb,results/lasb_ensemble_rmsd/receptors_raw/3DBK_holo_receptor.pdbqt,True
+6F8B,CXH,results/lasb_ensemble_rmsd/receptors_raw/6F8B_holo_receptor.pdb,results/lasb_ensemble_rmsd/receptors_raw/6F8B_holo_receptor.pdbqt,True
+6FZX,EEK,results/lasb_ensemble_rmsd/receptors_raw/6FZX_holo_receptor.pdb,results/lasb_ensemble_rmsd/receptors_raw/6FZX_holo_receptor.pdbqt,True
+7QH1,CI8,results/lasb_ensemble_rmsd/receptors_raw/7QH1_holo_receptor.pdb,results/lasb_ensemble_rmsd/receptors_raw/7QH1_holo_receptor.pdbqt,True
+8R1B,XI5,results/lasb_ensemble_rmsd/receptors_raw/8R1B_holo_receptor.pdb,results/lasb_ensemble_rmsd/receptors_raw/8R1B_holo_receptor.pdbqt,True
+8CC4,U7F,results/lasb_ensemble_rmsd/receptors_raw/8CC4_holo_receptor.pdb,results/lasb_ensemble_rmsd/receptors_raw/8CC4_holo_receptor.pdbqt,True
+9FQD,A1IEX,results/lasb_ensemble_rmsd/receptors_raw/9FQD_holo_receptor.pdb,results/lasb_ensemble_rmsd/receptors_raw/9FQD_holo_receptor.pdbqt,True
+9FQE,A1IEU,results/lasb_ensemble_rmsd/receptors_raw/9FQE_holo_receptor.pdb,results/lasb_ensemble_rmsd/receptors_raw/9FQE_holo_receptor.pdbqt,True
+9FQX,A1IJJ,results/lasb_ensemble_rmsd/receptors_raw/9FQX_holo_receptor.pdb,results/lasb_ensemble_rmsd/receptors_raw/9FQX_holo_receptor.pdbqt,True
+9FQY,A1IFN,results/lasb_ensemble_rmsd/receptors_raw/9FQY_holo_receptor.pdb,results/lasb_ensemble_rmsd/receptors_raw/9FQY_holo_receptor.pdbqt,True
+9FRY,A1IFU,results/lasb_ensemble_rmsd/receptors_raw/9FRY_holo_receptor.pdb,results/lasb_ensemble_rmsd/receptors_raw/9FRY_holo_receptor.pdbqt,True
+9FRZ,A1IFZ,results/lasb_ensemble_rmsd/receptors_raw/9FRZ_holo_receptor.pdb,results/lasb_ensemble_rmsd/receptors_raw/9FRZ_holo_receptor.pdbqt,True
+9GM4,A1IM0,results/lasb_ensemble_rmsd/receptors_raw/9GM4_holo_receptor.pdb,results/lasb_ensemble_rmsd/receptors_raw/9GM4_holo_receptor.pdbqt,True
+9FS0,A1IFY,results/lasb_ensemble_rmsd/receptors_raw/9FS0_holo_receptor.pdb,results/lasb_ensemble_rmsd/receptors_raw/9FS0_holo_receptor.pdbqt,True
