@@ -1,0 +1,9 @@
+receptor_id,role,source_pdb,prep_ok,pdbqt,n_atoms,zn_present,ca_present
+1EZM_crystal,Condition B (apo crystal),results/lasb_payload/ensemble_receptors_aligned/1EZM_baseline_crystal.pdb,True,results/lasb_ensemble_rmsd/receptors_raw/1EZM_crystal_prepped.pdbqt,3220,True,True
+1EZM_zinc_stripped,zinc-strip control (isolates pure volume effect),results/lasb_ensemble_rmsd/receptors_raw/1EZM_zinc_stripped.pdb,True,results/lasb_ensemble_rmsd/receptors_raw/1EZM_zinc_stripped_prepped.pdbqt,3219,False,True
+beta0.0,Condition A (ensemble),results/lasb_ensemble_rmsd/receptors_raw/beta0.0_zn_regenerated.pdb,True,results/lasb_ensemble_rmsd/receptors_raw/beta0.0_prepped.pdbqt,2867,True,True
+beta3.2,Condition A (ensemble),results/lasb_ensemble_rmsd/receptors_raw/beta3.2_zn_regenerated.pdb,True,results/lasb_ensemble_rmsd/receptors_raw/beta3.2_prepped.pdbqt,2867,True,True
+beta0.8,EXCLUDED -- Zn/Ca validation FAIL -- Glu164-Zn 1.40 A (too short),results/lasb_ensemble_rmsd/receptors_raw/beta0.8_zn_regenerated.pdb,,,,,
+beta1.6,EXCLUDED -- Zn/Ca validation FAIL -- His144-Zn 1.79 A (0.01 A under floor),results/lasb_ensemble_rmsd/receptors_raw/beta1.6_zn_regenerated.pdb,,,,,
+beta2.4,EXCLUDED -- structural clash unrelated to Zn site -- Arg208(NH2)-His224(CE1) 1.73 A,results/lasb_ensemble_rmsd/receptors_raw/beta2.4_zn_regenerated.pdb,,,,,
+beta4.0,EXCLUDED -- structural clash unrelated to Zn site -- Arg274(NH2)-Asn278(OD1) 1.56 A,results/lasb_ensemble_rmsd/receptors_raw/beta4.0_zn_regenerated.pdb,,,,,

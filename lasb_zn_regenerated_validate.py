@@ -107,9 +107,9 @@ for beta in CONFORMERS:
                         f"{xyz[0]:8.3f}{xyz[1]:8.3f}{xyz[2]:8.3f}{atom.occ:6.2f}{atom.b_iso:6.2f}"
                         f"          {atom.element.name:>2s}\n")
                 serial += 1
-        for label, pos in [("ZN", zn_pos), ("CA", ca_pos)]:
+        for label, pos, resnum in [("ZN", zn_pos, 900), ("CA", ca_pos, 901)]:
             xyz = R @ pos + t
-            f.write(f"HETATM{serial:5d} {label:<4s} {label:<3s} A 900    "
+            f.write(f"HETATM{serial:5d} {label:<4s} {label:<3s} A{resnum:4d}    "
                     f"{xyz[0]:8.3f}{xyz[1]:8.3f}{xyz[2]:8.3f}  1.00  0.00          {label:>2s}\n")
             serial += 1
         f.write("END\n")
