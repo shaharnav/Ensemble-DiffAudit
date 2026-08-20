@@ -1,0 +1,16 @@
+bbox_center,bbox_size,hac,ligand,pdbid,pdbqt_ok,pdbqt_path,sdf_ok,sdf_path
+"[55.6855, 34.756, 22.298000000000002]","[20.0, 20.0, 20.0]",32,HPI,1U4G,True,results/lasb_ensemble_rmsd/ligands_pdbqt/1U4G_HPI.pdbqt,True,results/lasb_ensemble_rmsd/ligands_sdf/1U4G_HPI.sdf
+"[56.632, 34.8245, 21.1495]","[20.0, 20.0, 20.0]",37,RDF,3DBK,True,results/lasb_ensemble_rmsd/ligands_pdbqt/3DBK_RDF.pdbqt,True,results/lasb_ensemble_rmsd/ligands_sdf/3DBK_RDF.sdf
+"[55.2815, 37.939499999999995, 19.8405]","[20.0, 20.0, 20.0]",13,CXH,6F8B,True,results/lasb_ensemble_rmsd/ligands_pdbqt/6F8B_CXH.pdbqt,True,results/lasb_ensemble_rmsd/ligands_sdf/6F8B_CXH.sdf
+"[54.542, 36.8425, 18.623]","[20.0, 20.0, 20.0]",16,EEK,6FZX,True,results/lasb_ensemble_rmsd/ligands_pdbqt/6FZX_EEK.pdbqt,True,results/lasb_ensemble_rmsd/ligands_sdf/6FZX_EEK.sdf
+"[60.4255, 38.3805, 24.1875]","[27.199000000000005, 20.0, 20.0]",42,CI8,7QH1,True,results/lasb_ensemble_rmsd/ligands_pdbqt/7QH1_CI8.pdbqt,True,results/lasb_ensemble_rmsd/ligands_sdf/7QH1_CI8.sdf
+"[54.372, 35.022, 18.697]","[20.0, 20.0, 20.272]",28,XI5,8R1B,True,results/lasb_ensemble_rmsd/ligands_pdbqt/8R1B_XI5.pdbqt,True,results/lasb_ensemble_rmsd/ligands_sdf/8R1B_XI5.sdf
+"[56.703500000000005, 37.0595, 22.7245]","[20.0, 20.0, 20.0]",22,U7F,8CC4,True,results/lasb_ensemble_rmsd/ligands_pdbqt/8CC4_U7F.pdbqt,True,results/lasb_ensemble_rmsd/ligands_sdf/8CC4_U7F.sdf
+"[55.8865, 37.127, 19.9595]","[20.0, 20.0, 20.0]",27,A1IEX,9FQD,True,results/lasb_ensemble_rmsd/ligands_pdbqt/9FQD_A1IEX.pdbqt,True,results/lasb_ensemble_rmsd/ligands_sdf/9FQD_A1IEX.sdf
+"[56.6245, 37.312, 19.83]","[20.0, 20.0, 20.0]",31,A1IEU,9FQE,True,results/lasb_ensemble_rmsd/ligands_pdbqt/9FQE_A1IEU.pdbqt,True,results/lasb_ensemble_rmsd/ligands_sdf/9FQE_A1IEU.sdf
+"[53.971999999999994, 35.1045, 19.4145]","[20.0, 20.0, 20.086999999999996]",31,A1IJJ,9FQX,True,results/lasb_ensemble_rmsd/ligands_pdbqt/9FQX_A1IJJ.pdbqt,True,results/lasb_ensemble_rmsd/ligands_sdf/9FQX_A1IJJ.sdf
+"[57.234, 37.829499999999996, 20.001]","[20.084000000000003, 20.0, 20.0]",31,A1IFN,9FQY,True,results/lasb_ensemble_rmsd/ligands_pdbqt/9FQY_A1IFN.pdbqt,True,results/lasb_ensemble_rmsd/ligands_sdf/9FQY_A1IFN.sdf
+"[58.3505, 37.795, 23.055]","[22.022999999999996, 20.0, 20.0]",25,A1IFU,9FRY,True,results/lasb_ensemble_rmsd/ligands_pdbqt/9FRY_A1IFU.pdbqt,True,results/lasb_ensemble_rmsd/ligands_sdf/9FRY_A1IFU.sdf
+"[57.385000000000005, 38.9285, 23.3415]","[20.270000000000003, 20.0, 20.0]",30,A1IFZ,9FRZ,True,results/lasb_ensemble_rmsd/ligands_pdbqt/9FRZ_A1IFZ.pdbqt,True,results/lasb_ensemble_rmsd/ligands_sdf/9FRZ_A1IFZ.sdf
+"[56.633, 36.085499999999996, 22.994999999999997]","[20.208, 20.0, 20.0]",24,A1IM0,9GM4,True,results/lasb_ensemble_rmsd/ligands_pdbqt/9GM4_A1IM0.pdbqt,True,results/lasb_ensemble_rmsd/ligands_sdf/9GM4_A1IM0.sdf
+"[58.9975, 37.3715, 22.4515]","[23.227000000000004, 20.0, 20.0]",28,A1IFY,9FS0,True,results/lasb_ensemble_rmsd/ligands_pdbqt/9FS0_A1IFY.pdbqt,True,results/lasb_ensemble_rmsd/ligands_sdf/9FS0_A1IFY.sdf
