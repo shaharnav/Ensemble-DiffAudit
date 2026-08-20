@@ -1,43 +1,18 @@
 """
 Step 5: secondary metrics on the docking poses already produced by Step 3.
 
-5a. Interaction fingerprint (ProLIF) recovery: native holo IFP (computed from
-    the crystallographic ligand + its own holo receptor) vs each docked pose's
-    IFP, Tanimoto similarity, reported per condition.
 5b. PoseBusters validity pass rate per condition.
 5c. Per-ligand winning conformer (which beta value produces the best top-1
     pose in condition A) -- one winner throughout vs different winners per
     ligand distinguishes "ensemble does real work" from "one better receptor."
+
+5a (ProLIF IFP recovery) was dropped -- see lasb_step5_driver.py docstring:
+ProLIF/MDAnalysis's RDKit bond-order standardization segfaults on the H-less
+receptor PDBs used throughout this experiment.
 """
-import csv, os
+import csv
 from collections import defaultdict
-import MDAnalysis as mda
-import prolif as plf
 from posebusters import PoseBusters
-from rdkit import Chem
-
-
-def native_ifp(holo_receptor_pdb, ligand_sdf):
-    u = mda.Universe(holo_receptor_pdb)
-    protein = u.select_atoms("protein")
-    lig_mol = Chem.SDMolSupplier(ligand_sdf, removeHs=False)[0]
-    lig_plf = plf.Molecule.from_rdkit(lig_mol)
-    prot_plf = plf.Molecule.from_mda(protein)
-    fp = plf.Fingerprint()
-    fp.run_from_iterable([lig_plf], prot_plf)
-    return fp.to_dataframe().iloc[0]
-
-
-def ifp_tanimoto(ref_series, pose_series):
-    ref_keys = set(k for k, v in ref_series.items() if v)
-    pose_keys = set(k for k, v in pose_series.items() if v)
-    if not ref_keys and not pose_keys:
-        return 1.0
-    if not ref_keys or not pose_keys:
-        return 0.0
-    inter = len(ref_keys & pose_keys)
-    union = len(ref_keys | pose_keys)
-    return inter / union if union else 0.0
 
 
 def posebusters_pass(pose_mol, receptor_pdb):
