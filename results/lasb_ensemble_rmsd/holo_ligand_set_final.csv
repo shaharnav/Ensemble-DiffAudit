@@ -1,0 +1,16 @@
+pdbid,ligand,mw,resolution_A,n_ca_matched,ca_alignment_rmsd_A,reference_pose_pdb
+1U4G,HPI,441.5,1.4,298,1.848,results/lasb_ensemble_rmsd/holo_ligands_aligned/1U4G_HPI_ref_pose.pdb
+3DBK,RDF,543.5,1.4,298,1.859,results/lasb_ensemble_rmsd/holo_ligands_aligned/3DBK_RDF_ref_pose.pdb
+6F8B,CXH,236.1,1.3,298,1.46,results/lasb_ensemble_rmsd/holo_ligands_aligned/6F8B_CXH_ref_pose.pdb
+6FZX,EEK,263.1,2.1,298,2.021,results/lasb_ensemble_rmsd/holo_ligands_aligned/6FZX_EEK_ref_pose.pdb
+7QH1,CI8,608.7,2.74,298,1.935,results/lasb_ensemble_rmsd/holo_ligands_aligned/7QH1_CI8_ref_pose.pdb
+8R1B,XI5,412.4,1.31,298,1.482,results/lasb_ensemble_rmsd/holo_ligands_aligned/8R1B_XI5_ref_pose.pdb
+8CC4,U7F,339.2,2.7,298,1.841,results/lasb_ensemble_rmsd/holo_ligands_aligned/8CC4_U7F_ref_pose.pdb
+9FQD,A1IEX,439.3,1.7,297,1.876,results/lasb_ensemble_rmsd/holo_ligands_aligned/9FQD_A1IEX_ref_pose.pdb
+9FQE,A1IEU,488.3,1.6,298,1.821,results/lasb_ensemble_rmsd/holo_ligands_aligned/9FQE_A1IEU_ref_pose.pdb
+9FQX,A1IJJ,488.3,1.8,298,1.489,results/lasb_ensemble_rmsd/holo_ligands_aligned/9FQX_A1IJJ_ref_pose.pdb
+9FQY,A1IFN,466.4,1.6,298,1.905,results/lasb_ensemble_rmsd/holo_ligands_aligned/9FQY_A1IFN_ref_pose.pdb
+9FRY,A1IFU,381.8,1.35,299,1.832,results/lasb_ensemble_rmsd/holo_ligands_aligned/9FRY_A1IFU_ref_pose.pdb
+9FRZ,A1IFZ,495.3,1.7,298,1.855,results/lasb_ensemble_rmsd/holo_ligands_aligned/9FRZ_A1IFZ_ref_pose.pdb
+9GM4,A1IM0,333.4,1.51,298,2.076,results/lasb_ensemble_rmsd/holo_ligands_aligned/9GM4_A1IM0_ref_pose.pdb
+9FS0,A1IFY,407.4,1.3,298,1.835,results/lasb_ensemble_rmsd/holo_ligands_aligned/9FS0_A1IFY_ref_pose.pdb
