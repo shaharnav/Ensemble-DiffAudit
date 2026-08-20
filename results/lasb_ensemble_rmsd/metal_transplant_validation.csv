@@ -1,0 +1,7 @@
+accept,ca_ASP136.OD2,ca_ASP183.OD1,ca_GLU172.OE2,ca_GLU175.OE1,ca_LEU185.O,ca_closest_protein_atom,ca_closest_protein_dist,ca_max_ligand_dist,conformer,zn_GLU164.OE2,zn_HIS140.NE2,zn_HIS144.NE2,zn_closest_protein_atom,zn_closest_protein_dist,zn_max_ligand_dist,ca_GLU175.OE2,zn_GLU164.OE1
+False,2.79,2.79,2.77,2.8,2.51,LEU185.O,2.51,2.8,beta0.0,1.87,3.2,1.26,HIS144.NE2,1.26,3.2,,
+False,2.15,3.42,2.95,,2.22,ASP136.OD2,2.15,3.42,beta0.8,1.53,3.17,1.35,HIS144.NE2,1.35,3.17,2.62,
+False,2.72,2.84,2.73,2.53,2.84,GLU175.OE1,2.53,2.84,beta1.6,2.05,2.84,1.79,HIS144.CE1,1.42,2.84,,
+False,2.2,3.62,3.18,,2.7,ASP136.OD2,2.2,3.62,beta2.4,2.27,3.34,1.22,HIS144.NE2,1.22,3.34,2.86,
+False,2.24,3.14,2.79,,2.84,ASP136.OD2,2.24,3.14,beta3.2,1.61,3.1,1.43,HIS144.NE2,1.43,3.1,2.57,
+False,2.6,3.33,2.73,,2.35,LEU185.O,2.35,3.33,beta4.0,,2.48,1.09,HIS144.NE2,1.09,2.48,2.42,1.87
