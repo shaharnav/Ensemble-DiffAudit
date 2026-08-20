@@ -17,6 +17,7 @@ import csv, os
 from collections import defaultdict
 from rdkit import Chem
 from rdkit.Chem import AllChem
+from meeko import PDBQTMolecule, RDKitMolCreate
 
 
 def load_reference_mol(pdbid, ligand):
@@ -24,45 +25,32 @@ def load_reference_mol(pdbid, ligand):
     return Chem.SDMolSupplier(sdf, removeHs=False)[0]
 
 
-def load_poses_from_pdbqt(pdbqt_path, template_mol):
-    """Parse a multi-model Vina output pdbqt into a list of RDKit mols with
-    the docked coordinates, using template_mol for correct bond orders
-    (Vina/meeko pdbqt loses bond-order info in the ROOT/torsion-tree format)."""
+def load_poses_from_pdbqt(pdbqt_path, template_mol=None):
+    """Reconstruct docked poses as RDKit mols (one per pose, correct bond
+    orders, heavy atoms only) from a multi-model Vina output pdbqt.
+
+    Uses meeko's own PDBQTMolecule/RDKitMolCreate reconstruction (bond
+    orders from the SMILES meeko embedded in the pdbqt at prep time) rather
+    than a manual atom-order-dependent reimplementation -- meeko's torsion
+    tree (ROOT/BRANCH) does not preserve the original SDF atom order, so a
+    naive index-aligned coordinate assignment against template_mol would
+    silently mismatch atoms. template_mol is unused; kept as a parameter for
+    call-site compatibility.
+    """
     mols = []
     if not os.path.exists(pdbqt_path):
         return mols
-    with open(pdbqt_path) as f:
-        blocks, current = [], []
-        for line in f:
-            if line.startswith("MODEL"):
-                current = []
-            elif line.startswith("ENDMDL"):
-                blocks.append(current)
-            elif line.startswith(("ATOM", "HETATM")):
-                current.append(line)
-    for block in blocks:
-        coords = []
-        for line in block:
-            x, y, z = float(line[30:38]), float(line[38:46]), float(line[46:54])
-            coords.append((x, y, z))
-        if len(coords) != template_mol.GetNumAtoms():
-            # pdbqt heavy-atom-only vs template with Hs -- filter template to heavy atoms
-            heavy_idx = [a.GetIdx() for a in template_mol.GetAtoms() if a.GetSymbol() != "H"]
-            if len(coords) != len(heavy_idx):
-                mols.append(None)
-                continue
-            mol = Chem.RWMol(template_mol)
-            for i in sorted([a.GetIdx() for a in template_mol.GetAtoms() if a.GetSymbol() == "H"], reverse=True):
-                mol.RemoveAtom(i)
-            mol = mol.GetMol()
-        else:
-            mol = Chem.Mol(template_mol)
-        conf = Chem.Conformer(mol.GetNumAtoms())
-        for i, (x, y, z) in enumerate(coords):
-            conf.SetAtomPosition(i, (x, y, z))
-        mol.RemoveAllConformers()
-        mol.AddConformer(conf)
-        mols.append(mol)
+    pdbqt_mol = PDBQTMolecule.from_file(pdbqt_path, skip_typing=True)
+    rdkit_mols = RDKitMolCreate.from_pdbqt_mol(pdbqt_mol)
+    if not rdkit_mols:
+        return mols
+    mol = rdkit_mols[0]  # single ligand, multiple poses as conformers
+    mol_noH = Chem.RemoveHs(mol)
+    for conf in mol_noH.GetConformers():
+        pose = Chem.Mol(mol_noH)
+        pose.RemoveAllConformers()
+        pose.AddConformer(conf, assignId=True)
+        mols.append(pose)
     return mols
 
 
