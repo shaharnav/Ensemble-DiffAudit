@@ -17,7 +17,13 @@ for lig in ligand_rows:
         jobs.append(("C", lig["id"], lig["pdbqt"], lig["pdbid"], holo_pdbqt, seed))
 
 print(f"{len(jobs)} Condition C docking jobs")
-with Pool(processes=8) as pool:
+# Pool(8) silently produced near-zero (degenerate) scores for most Condition C
+# receptors -- confirmed the same job() call gives a normal score (-5.166 for
+# 6F8B) when run in isolation but ~0.0 under 8-way parallelism, pointing at
+# resource contention during Vina's per-receptor grid computation (15 distinct
+# large receptor files here, vs. only 3 distinct/heavily-repeated files in
+# conditions A/B). Reduced concurrency to avoid it.
+with Pool(processes=2) as pool:
     results = pool.map(job, jobs)
 
 n_ok = sum(1 for r in results if r["ok"])
