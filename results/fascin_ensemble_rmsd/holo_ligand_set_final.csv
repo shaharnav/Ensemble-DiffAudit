@@ -1,0 +1,12 @@
+ca_alignment_rmsd_A,ligand,max_bfactor,mean_bfactor,mean_occupancy,min_dist_to_established_pocket_A,min_occupancy,n_ca_matched,n_lig_atoms,pdbid,reference_pose_pdb
+1.446,GZQ,37.5,36.5,1.0,4.71,1.0,470,13,6I0Z,results/fascin_ensemble_rmsd/holo_ligands_aligned/6I0Z_GZQ_ref_pose.pdb
+3.455,GZK,56.7,46.0,1.0,1.69,1.0,468,26,6I10,results/fascin_ensemble_rmsd/holo_ligands_aligned/6I10_GZK_ref_pose.pdb
+3.873,H0H,41.0,29.6,1.0,2.53,1.0,469,27,6I11,results/fascin_ensemble_rmsd/holo_ligands_aligned/6I11_H0H_ref_pose.pdb
+3.898,H08,37.5,26.8,1.0,2.46,1.0,469,28,6I12,results/fascin_ensemble_rmsd/holo_ligands_aligned/6I12_H08_ref_pose.pdb
+3.658,H0Q,35.9,29.1,1.0,2.36,1.0,469,28,6I13,results/fascin_ensemble_rmsd/holo_ligands_aligned/6I13_H0Q_ref_pose.pdb
+3.854,GZN,38.3,27.9,1.0,2.55,1.0,469,29,6I14,results/fascin_ensemble_rmsd/holo_ligands_aligned/6I14_GZN_ref_pose.pdb
+3.449,GZT,44.3,36.0,1.0,2.0,1.0,469,23,6I15,results/fascin_ensemble_rmsd/holo_ligands_aligned/6I15_GZT_ref_pose.pdb
+3.757,H0B,49.2,33.2,1.0,2.23,1.0,469,29,6I16,results/fascin_ensemble_rmsd/holo_ligands_aligned/6I16_H0B_ref_pose.pdb
+3.859,GZW,25.9,20.2,1.0,2.55,1.0,469,35,6I17,results/fascin_ensemble_rmsd/holo_ligands_aligned/6I17_GZW_ref_pose.pdb
+3.892,H0N,27.6,22.7,1.0,2.15,1.0,469,34,6I18,results/fascin_ensemble_rmsd/holo_ligands_aligned/6I18_H0N_ref_pose.pdb
+3.874,A1IPD,53.9,38.8,1.0,2.12,1.0,469,25,9GS6,results/fascin_ensemble_rmsd/holo_ligands_aligned/9GS6_A1IPD_ref_pose.pdb

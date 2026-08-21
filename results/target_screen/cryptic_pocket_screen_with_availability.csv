@@ -1,0 +1,34 @@
+apo_pdb,chembl_activity_count,chembl_target_id,error,frac_access_disp_structured,gate_primary_pass,gate_secondary_pass,global_ca_rmsd_A,global_rmsd_A,holo_pdb,ligand,mean_lig_bfactor,mean_lig_occupancy,min_lig_occupancy,motion_type,n_access_residues,n_contact_residues,n_lig_atoms,n_matched,n_matched_ca,pdb_ligand_structures_frac_real,pdb_ligand_structures_total,pocket_ca_rmsd_access_A,pocket_ca_rmsd_contact_A,set,uniprot
+4I92,0,,,0.331,False,False,1.047,,4I94,ANP,13.1,1.0,1.0,id,57,19,31,,289,0.5,2,1.149,1.104,test,Q9FHD7
+6E5D,0,,,0.906,False,True,0.793,,6E5F,L6T,74.0,1.0,1.0,ssm,57,25,81,,173,1.0,1,0.968,0.955,validation,O53780
+5H9A,7,CHEMBL2076,,0.391,False,False,1.148,,6E5L,HVD,13.8,1.0,1.0,loop,72,28,53,,139,1.0,20,1.317,1.429,test,P09455
+4IC4,0,,,0.558,False,False,0.761,,4INQ,PIF,49.1,1.0,1.0,loop,87,30,43,,372,0.5,2,1.285,1.458,validation,P38713
+1EZM,381,CHEMBL1075146,,0.463,False,False,1.244,,3DBK,RDF,10.9,1.0,1.0,id,62,21,37,,298,0.88,21,1.326,1.506,validation,P14756
+1S2O,0,,,0.658,True,True,3.336,,1U2S,GLC,43.2,1.0,1.0,id,49,14,12,,244,0.12,8,3.163,3.096,validation,P74325
+1TVQ,0,,,0.55,False,False,1.162,,1TW4,CHD,21.9,1.0,1.0,ssm,59,19,29,,125,1.0,10,1.443,1.625,test,P80226
+2OY4,2076,CHEMBL4588,,0.183,False,False,0.836,,3DPF,AXB,22.6,1.0,1.0,loop,42,26,37,,157,0.62,25,1.421,1.345,validation,P22894
+5NIA,2864,CHEMBL4618,,0.398,True,False,2.138,,5NI6,DJ3,38.4,0.52,0.52,"ssm, loop",75,34,52,,607,1.0,77,2.006,2.19,test,P09960
+1Y1A,49,CHEMBL4879503,,0.704,True,True,2.661,,1Y1A,GSH,97.2,0.5,0.5,ssc,10,2,3,,183,0.14,7,3.631,3.5,validation,Q99828
+3NX1,0,,,0.437,False,False,0.883,,3NX2,FER,42.4,1.0,1.0,ssm,35,11,14,,162,1.0,2,1.648,2.052,test,C6F3U5
+1KX9,0,,,0.86,False,True,1.798,,1N8V,BDD,22.6,1.0,1.0,ssm,48,13,14,,93,0.67,3,1.343,1.347,test,Q9NG96
+5NZM,0,,,0.525,True,False,2.603,,2OEG,UPG,17.4,1.0,1.0,id,74,27,36,,482,0.88,11,2.158,2.367,test,Q4QDU3
+2CEY,0,,,0.648,True,True,2.859,,6H76,SLB,15.0,1.0,1.0,id,61,18,21,,306,0.88,16,3.221,2.873,test,P44542
+1URP,0,,,0.461,True,False,4.062,,2DRI,RIP,5.0,1.0,1.0,id,55,15,20,,271,1.0,5,3.571,3.495,test,P02925
+3FVJ,227,CHEMBL4715,,0.727,True,True,1.47,,2B03,TUD,57.1,1.0,1.0,ssc,51,21,34,,124,0.5,30,2.111,2.174,validation,P00592
+3UGK,0,,,0.314,True,False,3.184,,3UH1,NAI,21.3,1.0,1.0,"id, loop",81,36,44,,367,0.8,5,3.23,3.023,test,P38998
+2ZKU,50,CHEMBL6040,,0.334,True,False,1.253,,3VQS,JT1,25.9,1.0,1.0,loop,86,31,47,,551,0.5,97,2.876,2.42,test,P26663
+5ZA4,0,,,0.43,True,False,3.435,,5YYB,NGE,33.9,1.0,1.0,id,72,24,40,,482,1.0,2,4.223,3.999,test,Q7VL18
+3P53,338,CHEMBL4523304,,0.685,True,True,3.979,,6I11,H0H,29.6,1.0,1.0,id,51,16,27,,484,0.75,25,5.253,4.556,test,Q16658
+2HQ8,0,,,0.764,True,True,4.018,,2HPS,CTZ,14.2,1.0,1.0,ssm,77,25,32,,182,0.5,2,3.35,3.144,test,C9V488
+2W9T,0,,,0.296,True,False,1.626,,2W9S,NDP,26.1,1.0,1.0,loop,64,33,48,,157,1.0,1,2.332,2.796,test,P13955
+4R72,0,,,0.622,True,True,4.117,,4R74,F6P,14.2,0.15,0.15,id,61,24,16,,318,0.75,4,4.461,4.883,test,A3N294
+3QXW,,,,0.702,False,True,1.047,,3QXV,MTX,64.5,1.0,1.0,ssc,44,20,33,,123,,,1.63,2.321,test,
+3KJE,0,,,0.326,True,False,1.632,,3KJG,ADP,42.8,1.0,1.0,ssc,46,21,27,,254,0.67,3,2.642,2.805,validation,Q3ACS5
+2LAO,0,,,0.556,True,False,4.755,,1LAH,ORN,12.5,1.0,1.0,id,46,15,9,,238,1.0,20,4.963,5.186,test,P02911
+4P0I,0,,,0.587,True,False,4.986,,5OTA,AQQ,26.2,1.0,1.0,id,60,21,14,,254,0.88,10,5.337,5.386,validation,P35120
+1J8F,4236,CHEMBL4462,,0.415,True,False,3.417,,6QCN,AR6,35.3,1.0,1.0,id,64,26,36,,300,0.75,78,4.098,4.055,validation,Q8IXJ6
+6HB0,0,,,0.463,True,False,6.034,,6HBD,GZL,48.1,1.0,1.0,"id, ssc",59,17,24,,302,0.75,4,4.661,4.514,test,A0QT50
+2FJY,0,,,0.353,True,False,5.606,,2P70,PRZ,54.4,1.0,1.0,lr,48,13,12,,126,1.0,3,7.537,7.778,test,P34174
+1OK8,261,CHEMBL3308998,,0.632,True,True,11.894,,1OKE,BOG,114.2,1.0,1.0,ssc,52,17,20,,380,1.0,12,8.584,8.206,validation,P12823
+2OHG,0,,,0.679,False,True,0.898,,2OHV,NHL,54.3,1.0,1.0,loop,58,20,21,,258,0.5,2,1.37,1.313,validation,Q9A1B7
+2WGB,0,,,0.814,True,True,4.514,,2V57,PRL,25.8,1.0,1.0,lr,40,13,16,,169,0.5,2,4.58,4.121,validation,Q58L87

@@ -1,0 +1,10 @@
+drug,flap_tip_disp_A,frac_pocket_disp_structured,global_ca_rmsd_A,ligand,max_bfactor,mean_bfactor,mean_occupancy,min_occupancy,mutations,n_ca_common,n_lig_atoms,n_pocket_residues,pdbid,pocket_ca_rmsd_A
+saquinavir,4.24,0.287,1.184,ROC,28.6,16.8,0.56,0.56,I3V,99,49,31,1HXB,1.376
+ritonavir,5.086,0.321,1.267,RIT,37.3,21.8,1.0,1.0,S37N,99,50,32,1HXW,1.193
+indinavir,4.599,0.33,1.185,MK1,51.4,30.4,1.0,1.0,none (wild-type),99,45,27,1HSG,1.145
+nelfinavir,4.303,0.312,1.097,1UN,27.0,17.9,1.0,1.0,none (wild-type),99,44,29,1OHR,0.978
+amprenavir,4.6,0.367,1.221,478,50.1,29.3,1.0,1.0,none (wild-type),99,35,29,1HPV,1.069
+lopinavir,4.387,0.324,1.012,AB1,8.9,5.9,0.75,0.75,Q7K,99,46,27,2O4S,1.047
+atazanavir,4.804,0.255,1.117,DR7,27.7,23.4,0.75,0.75,Q7K,99,51,30,2O4K,1.488
+darunavir,4.933,0.349,1.185,017,15.0,11.1,0.55,0.55,"Q7K,L33I,L63I,C67A,C95A",99,38,27,2IEN,1.176
+tipranavir,5.253,0.315,1.192,TPV,33.5,26.6,1.0,1.0,Q7K,99,42,30,2O4P,1.19
