@@ -1,5 +1,15 @@
 # Fascin Step 3: final result — ConforMix/Boltz twist-guidance does not produce viable conformers for this target, at any tested setting
 
+## STATUS: FAILED — experiment terminated at Step 3
+
+Fascin is closed out as a **failed target** for this experiment. No usable
+conformer ensemble was produced, so Steps 4-7 (docking, RMSD measurement,
+secondary metrics, final analysis) were never started for fascin — there is
+nothing downstream of this document. This is a clean negative result, not an
+inconclusive or paused one: the pre-registered retry ladder was exhausted per
+its own fixed acceptance criterion, and per that pre-registration no further
+generation settings will be tried.
+
 ## Bottom line
 
 **0 of 16** original conformers, and **0 of 8** ladder-retry conformers
