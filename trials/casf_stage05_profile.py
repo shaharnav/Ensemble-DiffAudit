@@ -1,6 +1,7 @@
 """Stage 0.5 -- profile full feature set on 50 complexes, broken down by group,
 extrapolate to the full available set. Time box: 15 min."""
-import csv, time
+import csv, os, sys, time
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from casf_pipeline.pdbqt_atoms import parse_pdbqt_atoms, atoms_to_arrays, find_donor_heavy_atoms
 from casf_pipeline import features as F
 

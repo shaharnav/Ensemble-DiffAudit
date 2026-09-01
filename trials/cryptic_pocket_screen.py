@@ -18,6 +18,7 @@ import gemmi
 import numpy as np
 import csv
 import os
+import re
 import warnings
 from Bio import Align
 from Bio.PDB.Polypeptide import protein_letters_3to1_extended
@@ -256,7 +257,14 @@ if __name__ == "__main__":
 
     rows = []
     for p in pairs:
-        ligcode = p["ligand"].split(",")[0].lstrip("#0123456789x")  # strip prefix annotations like '#2' or '2x'
+        # take the first ligand in a composite/multi-ligand field, drop a ":NNN"
+        # residue-number annotation and a trailing "-ION" suffix, then strip a
+        # leading "NNx" multiplicity prefix (e.g. "2xCHD" -> "CHD") -- but NOT
+        # leading digits that are part of the real code (e.g. "4CS", "181", "03F").
+        ligcode = p["ligand"].split(",")[0].split(":")[0].split("-")[0]
+        m = re.match(r"^\d+x(.+)$", ligcode)
+        if m:
+            ligcode = m.group(1)
         try:
             result = screen_pair(p["apo_pdb"], p["apo_chain"], p["holo_pdb"], p["holo_chain"], ligcode)
         except Exception as e:

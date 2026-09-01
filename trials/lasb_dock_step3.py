@@ -21,15 +21,15 @@ EXHAUSTIVENESS = 16
 NUM_MODES = 20
 ENERGY_RANGE = 5
 
-# Filled in once Step 1 validation determines which conformers survive.
-# Each conformer gets a distinct seed; conditions B and C reuse this exact list.
+# Step 1d result: n=2 validated conformers (beta0.0, beta3.2). Each gets a
+# distinct seed; conditions B and C reuse this exact 2-seed list (matched compute).
 CONFORMER_RECEPTORS = {
-    # "beta0.0": "results/lasb_ensemble_rmsd/receptors_raw/beta0.0_prepped.pdbqt",
-    # ...
+    "beta0.0": "results/lasb_ensemble_rmsd/receptors_raw/beta0.0_prepped.pdbqt",
+    "beta3.2": "results/lasb_ensemble_rmsd/receptors_raw/beta3.2_prepped.pdbqt",
 }
 SEEDS = list(range(1, len(CONFORMER_RECEPTORS) + 1))  # matched across A/B/C
 
-APO_RECEPTOR = "results/lasb_ensemble_rmsd/receptors_raw/1EZM_apo_prepped.pdbqt"
+APO_RECEPTOR = "results/lasb_ensemble_rmsd/receptors_raw/1EZM_crystal_prepped.pdbqt"
 
 OUT_DIR = "results/lasb_ensemble_rmsd/docking"
 os.makedirs(OUT_DIR, exist_ok=True)

@@ -3,8 +3,9 @@ Batch-extract (protein, ligand) for all 285 CASF-2016-derived complexes.
 Parallelized with multiprocessing since CCD lookups + RDKit template matching
 are independent per complex. Logs failures rather than silently dropping them.
 """
-import csv, os, time
+import csv, os, sys, time
 from multiprocessing import Pool
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from casf_pipeline.extract import extract_ligand_mol, parse_pdb_hetatm_groups, pick_ligand_group, extract_protein
 
 STRUCT_DIR = "results/casf2016/structures"

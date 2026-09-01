@@ -3,8 +3,9 @@ Stage 0 -- bias audit. Prep receptor+ligand pdbqt for all extracted complexes,
 score with Vina and Vinardo (native vina 1.2.7 binary, --score_only), compute
 HAC, and write a tidy scores CSV. Parallelized with multiprocessing.
 """
-import os, csv, re, subprocess, time
+import os, csv, re, subprocess, sys, time
 from multiprocessing import Pool
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from casf_pipeline.prep import prepare_receptor_pdbqt, prepare_ligand_pdbqt_from_sdf, ligand_bbox_center_size
 from rdkit import Chem
 

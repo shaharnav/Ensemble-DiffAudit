@@ -14,7 +14,7 @@ Identical settings to Phases 4-5 (exhaustiveness=16, same box/center approach).
 import csv, os, sys, statistics
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-sys.path.insert(0, os.path.dirname(__file__))
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from docking_engine import run_docking
 
 SEEDS = [42, 123, 456]

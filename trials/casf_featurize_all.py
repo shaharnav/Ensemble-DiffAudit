@@ -1,6 +1,7 @@
 """Featurize all Stage-0-successful complexes with the full A-F feature set."""
-import csv, time
+import csv, os, sys, time
 from multiprocessing import Pool
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from casf_pipeline.features import extract_all_features
 
 def process(pdbid):

@@ -24,12 +24,12 @@ candidates docked against a 6-conformer breathing receptor ensemble, rendered as
 | Target | Stage | Outcome | Docs |
 |---|---|---|---|
 | Trypsin (3PTB) — pilot | Full pipeline run, N=112 | **Negative, statistically significant**: ensemble underperforms noise-matched rigid baseline | [Key findings](#key-findings) below |
-| LasB (*P. aeruginosa* elastase) | Phases 4-6 generation + docking | **Null result** (n=15 ligands, CI spans zero). Earlier phase 4-6 numbers were computed on zinc-free receptors and are superseded — see `lasb_ensemble_rmsd_final_report.md` | `lasb_*.py`, `lasb_ensemble_rmsd_final_report.md` |
+| LasB (*P. aeruginosa* elastase) | Phases 4-6 generation + docking | **Null result** (n=15 ligands, CI spans zero). Earlier phase 4-6 numbers were computed on zinc-free receptors and are superseded — see `lasb_ensemble_rmsd_final_report.md` | `trials/lasb_*.py`, `lasb_ensemble_rmsd_final_report.md` |
 | Fascin | Step 1-3 generation | **Terminated/failed**: ConforMix twist-guidance produced 0/4 passing conformers at every tested setting | `fascin_archive/`, `results/fascin_ensemble_rmsd/STEP3_FINAL_FINDING.md` |
 | LfrR (TetR-family regulator) + proflavine | Pre-screen | **Viable** — only target to clear all 6 pre-registered gates across ~30 candidates in 3 screening rounds. Staged, generation not yet run | `NEW_TARGET_SCREEN_RESULTS.md`, `targets.yaml` |
 | Xylellain, CLas IMPDH, AQP5, DYRK1A | Pre-screen | **Rejected** before any GPU time — DSSP/pocket-RMSD gates failed | `xylellain_archive/`, `impdh_archive/`, `PREREGISTRATION_EXP3.md` |
-| CauDHFR (*Candida auris* DHFR) | Experiment 3, gate sequence | In progress | `PREREGISTRATION_EXP3.md`, `caudhfr_*.py` |
-| GluR | Pocket/box determination | In progress | `glur_*.py` |
+| CauDHFR (*Candida auris* DHFR) | Experiment 3, gate sequence | In progress | `PREREGISTRATION_EXP3.md`, `trials/caudhfr_*.py` |
+| GluR | Pocket/box determination | In progress | `trials/glur_*.py` |
 
 Pre-registration is the load-bearing discipline here: gates (DSSP structuredness, pocket RMSD,
 holo ligand druglikeness, cofactor differences, apo-selection) are committed to a file
@@ -299,22 +299,25 @@ To refresh the demo data after regenerating a new ensemble, copy the new `viz_bu
 
 ## Repository layout
 
-- **Core pipeline** (target-agnostic): `analyzer.py`, `app.py`, `fetcher.py`,
-  `docking_engine.py`, `ensemble_auditor.py`, `chem_metrics.py`, `attrition.py`,
-  `calibrate.py`, `pocket_rmsd.py`, `rigid_control.py`, `summarize_results.py`,
-  `build_viz_bundle.py`. See [How it works](#how-it-works).
-- **Target screening** (finds and gates the next target before any generation run):
-  `target_screen.py`, `cryptic_pocket_screen.py`, `exp2_screen_enrich.py`, plus the
-  generic `exp3_*.py` gate scripts (DSSP, pocket-RMSD, holo checks) applied to whichever
-  candidate `targets.yaml` / `pocket_config_*.yaml` points at. Screening criteria are
-  pre-registered in `PREREGISTRATION.md`, `PREREGISTRATION_EXP3.md`,
-  `GATE_DEFINITION_PREREGISTRATION.md`, `APO_SELECTION_RULE_PREREGISTRATION.md`.
-- **Per-target scripts**: prefixed by target (`lasb_*.py`, `glur_*.py`, `caudhfr_*.py`,
-  `hiv_step1bc_screen.py`) — receptor prep, ligand transplant, and RMSD/geometry
-  validation specific to that target's structures. `casf_pipeline/` and `casf_*.py` are a
-  separate CASF-2016 benchmark reproduction, not a target campaign.
-  `phase5_*.py`/`phase6_*.py`/`phase7_*.py` are later-stage decoy/docking/reproducibility
-  scripts, currently attached to the LasB campaign.
+- **Core pipeline** (target-agnostic, stays at root): `analyzer.py`, `app.py`,
+  `fetcher.py`, `docking_engine.py`, `ensemble_auditor.py`, `chem_metrics.py`,
+  `attrition.py`, `calibrate.py`, `pocket_rmsd.py`, `rigid_control.py`,
+  `summarize_results.py`, `build_viz_bundle.py`, `start.py`, `test_suite.py`, plus the
+  `casf_pipeline/` library (shared PDBQT/feature-extraction code, imported by several
+  `trials/casf_*.py` and `trials/lasb_*.py` scripts). See [How it works](#how-it-works).
+- **`trials/`**: every one-off trial, screen, or benchmark driver script — target
+  screening (`target_screen.py`, `cryptic_pocket_screen.py`, `exp2_screen_enrich.py`, the
+  generic `exp3_*.py` gate scripts), per-target prep/validation scripts (`lasb_*.py`,
+  `glur_*.py`, `caudhfr_*.py`, `hiv_step1bc_screen.py`), the `phase5_*.py`/`phase6_*.py`/
+  `phase7_*.py` LasB decoy/docking/reproducibility scripts, and the CASF-2016 benchmark
+  reproduction (`casf_*.py`). All still run from the repo root
+  (`python trials/<script>.py`) — they resolve `casf_pipeline`/`docking_engine` by
+  inserting the repo root onto `sys.path`, and every other path in them (data dirs,
+  `targets.yaml`, `pdbs/...`) is relative to the invocation cwd, not the script's own
+  location. Screening criteria are pre-registered in `PREREGISTRATION.md`,
+  `PREREGISTRATION_EXP3.md`, `GATE_DEFINITION_PREREGISTRATION.md`,
+  `APO_SELECTION_RULE_PREREGISTRATION.md` (kept at root alongside the results docs they
+  govern).
 - **`<target>_archive/`**: working files for a target whose pre-screen failed or whose
   campaign was terminated (`xylellain_archive/`, `impdh_archive/`, `fascin_archive/`).
   Results and writeups for these stay under `results/<target>/`; only the driver scripts
