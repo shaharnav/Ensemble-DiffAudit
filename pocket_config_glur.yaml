@@ -1,0 +1,31 @@
+center:
+- 36.096
+- 35.361
+- 70.104
+box_size_A:
+- 18.828
+- 17.834
+- 14.97
+transfer_source_pdb: 2OHV
+transfer_ligand_code: NHL
+local_alignment_rmsd_A: 1.235
+local_alignment_n_residues: 49
+check_2a_alignment_validity_distance_A: 3.97
+check_2a_alignment_validity_threshold_A: 5.0
+check_2a_alignment_validity_result: PASS
+check_2b_box_coverage_min_margin_A: 5.0
+check_2b_box_coverage_required_margin_A: 5.0
+check_2b_box_coverage_result: PASS
+check_2c_redock_validation_distance_A: 4.634
+check_2c_redock_validation_threshold_A: 5.0
+check_2c_redock_validation_result: PASS
+check_2c_redock_affinity_kcal_mol: -6.914
+check_2c_note: Centroid distance computed over heavy atoms only (21 atoms); Meeko
+  v0.7 placed 2 polar Hs at >100 A -- excluded.
+receptor_apo_pdb: results/experiment3_glur/receptors/R_apo_glur.pdb
+receptor_pdbqt: results/experiment3_glur/receptors/R_apo_glur.pdbqt
+note: Box determined by local superposition of 49 pocket-lining residues (8 A from
+  NHL in 2OHV), NHL heavy-atom centroid transferred to apo frame. Box covers all 21
+  NHL heavy atoms with 5.00 A margin. Validated by NHL redocking into 2OHG (4.634
+  A to expected centroid, -6.9 kcal/mol). All downstream stages must read center/box
+  from this file.
