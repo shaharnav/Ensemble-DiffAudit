@@ -34,6 +34,60 @@ pilot_target:
     difference) out of 43 PocketMiner apo/holo pairs. See target_screen.csv for the full
     screen output and PREREGISTRATION.md for the fixed screening criteria.
 
+new_target_lfrr:
+  name: "LfrR (TetR-family transcriptional regulator)"
+  organism: Mycobacterium smegmatis
+  apo:
+    pdb_id: 2WGB
+    chain: A
+    resolution_A: 2.0
+    ligand_present: false
+    cofactor_present: false
+    note: >
+      Only heteroatoms are HOH and SO4 (sulfate, a crystallization additive on the
+      standard blocklist, not a cofactor).
+  holo:
+    pdb_id: 2V57
+    chain: A
+    resolution_A: 1.9
+    ligand_code: PRL
+    ligand_name: Proflavine
+    ligand_mw: 209.247
+    cofactor_present: false
+    other_heteroatoms: [HOH, IPA, SO4]
+    note: >
+      IPA (isopropanol) and SO4 are both on the standard crystallization-additive
+      blocklist; PRL is the only non-blocklisted heteroatom distinguishing holo from
+      apo. Structure contains two dimer copies of PRL (chains A and C); confirmed the
+      chain-A-associated copy (residue 1188) is the one used for the chain-A pocket
+      analysis below, not the chain-C copy.
+  sequence_identity: "Same UniProt accession (Q58L87) in both entries; only 2 PDB depositions exist for this accession, so 2WGB is trivially the sole (and thus highest-resolution) apo entry per the apo-selection rule."
+  mechanism: >
+    Access-shell pocket CA RMSD 4.58 A (81.4% DSSP-structured), global CA RMSD 4.51 A --
+    a domain-scale, structured reorientation rather than a small local lid closure.
+    Contact residues span 67-152 (13 contact / 40 access-shell residues), with the
+    largest per-residue displacement (8-13 A) concentrated at residues 104-127. This is
+    a different motion type than the CRBP1 pilot's localized portal-loop closure --
+    closer to the literature-documented TetR-family "pendulum" mechanism, where the
+    DNA-binding domain reorients relative to the ligand-binding regulatory domain upon
+    effector binding. The moving region is well-structured (81% H/E, not a disordered
+    loop), which rules out the Xylellain failure mode (a 16.7%-structured propeptide
+    flailing 24-177 A) -- but whether ConforMix's local-perturbation sampling can reach
+    a domain-scale (if structured) motion, rather than just a loop/lid, is an open
+    question Phase 4 smoke-testing should resolve, not something assumed here.
+  selection_method: >
+    Only new target to clear all 6 pre-registered gates (GATE_DEFINITION_PREREGISTRATION.md)
+    across ~30 apo/holo candidates screened: the 43-usable-pair PocketMiner/CryptoSite pool
+    (cryptic_pocket_screen.py) plus ~21 hand-picked literature candidates spanning
+    TetR-family regulators, a cytokine PPI hot spot, a phosphatase allosteric site, a
+    kinase DFG-out pocket, and a viral polymerase's allosteric sites. Full trail in
+    NEW_TARGET_SCREEN_RESULTS.md and results/target_screen/new_target_screen_final.csv.
+    Audited before staging: the pocket/global RMSD ratio (1.01) was checked against the
+    other 8 pairs that pass the same structural gates in this screen (range 0.72-1.44)
+    and found unremarkable, not an outlier -- an initial instinct to reject on that
+    ratio alone (by analogy to CRBP1's higher 1.37 ratio) was an unwritten, retroactive
+    criterion, not a pre-registered gate, and was not applied.
+
 target_swap_history:
   - candidate: "DHFR, apo 2W9T / holo 2W9S"
     outcome: rejected before any run

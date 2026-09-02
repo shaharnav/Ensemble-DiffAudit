@@ -1,0 +1,8 @@
+ID,SMILES,overall_best_affinity,overall_best_structure,crystal_affinity,ensemble_best_affinity,delta_ensemble_vs_crystal,H_Bonds,QED,SA_Score,2V57_baseline_crystal.pdb,conformix_var_0_min.pdb,conformix_var_1_min.pdb,conformix_var_2_min.pdb
+Cmpd-0003,NC(=O)[C@H](CCCNC(=O)c1cccc(CO)c1)CC[C@@H]1C[C@@H]1C1CC1,-8.915,2V57_baseline_crystal.pdb,-8.915,-7.697,-1.217999999999999,2,0.531,3.395,-8.915,-6.879,-6.07,-7.697
+Cmpd-0009,CCCOC(=O)c1cc2c(cc1[C@@H]1SC3=CC=C(C)N4N=CN1C34)CCO2,-8.636,2V57_baseline_crystal.pdb,-8.636,-7.059,-1.576999999999999,0,0.74,4.513,-8.636,-5.047,-6.17,-7.059
+Cmpd-0007,CC(=O)N[C@@H](CO[C@H]1CCCCO1)NC(=O)c1coc(N)c1[C@@H](N)O,-8.347,2V57_baseline_crystal.pdb,-8.347,-6.799,-1.5479999999999992,2,0.41,4.295,-8.347,-5.428,-5.906,-6.799
+Cmpd-0008,N=C(CC1C=CC(O)=C(O)C=C1)NC(=O)c1ccccc1,-7.564,2V57_baseline_crystal.pdb,-7.564,-6.492,-1.072,1,0.508,3.252,-7.564,-5.537,-5.509,-6.492
+Cmpd-0006,CCCCCCCC(C)=C=C(C)[C@@H](C)C[C@H](O)CC[C@H](C)N,-7.134,2V57_baseline_crystal.pdb,-7.134,-6.993,-0.14100000000000001,3,0.377,4.022,-7.134,-6.425,-4.541,-6.993
+Cmpd-0001,Cc1nc2c(s1)C(=O)N[C@@H]1C(=C=CCC[C@@]2(C)O)c2nccn2[C@H]1C,-5.787,2V57_baseline_crystal.pdb,-5.787,-4.728,-1.0590000000000002,1,0.711,5.455,-5.787,-4.055,-4.728,-4.454
+Cmpd-0004,COC1=CC=C[C@]23[C@H]1N2[C@@H]3[C@@H](CC(=O)Cc1ccc2c(F)cccc2c1)C(=O)O,,,,,,0,0.733,4.96,,,,
